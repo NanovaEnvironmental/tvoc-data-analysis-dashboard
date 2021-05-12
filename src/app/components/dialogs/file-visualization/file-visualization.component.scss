@@ -1,0 +1,23 @@
+table {
+    width: 98%;
+    margin-left: 1%;
+    margin-right: 1%;
+}
+
+mat-header-cell {
+    display:flex;
+    justify-content:flex-end;
+}
+
+::ng-deep .mat-sort-header-container {
+    display:flex;
+    justify-content:center;
+}
+
+td, th {
+    text-align: center !important;
+}
+
+.mat-row:nth-child(odd) {
+    background-color: whitesmoke;
+}

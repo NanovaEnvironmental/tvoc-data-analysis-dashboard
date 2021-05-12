@@ -1,0 +1,54 @@
+
+  <div echarts [options]="chartOption" class="demo-chart"></div>
+
+  <table mat-table [dataSource]="dataSource" matSort  class="mat-elevation-z8">
+      <!-- ID Column -->
+      <ng-container matColumnDef="PIDName">
+        <th mat-header-cell *matHeaderCellDef> PID名称 </th>
+        <td mat-cell *matCellDef="let element"> {{element.PIDName}} </td>
+      </ng-container>
+    
+       <!-- Class Column -->>
+      <ng-container matColumnDef="numOfPoints">
+        <th mat-header-cell *matHeaderCellDef> 点数 </th>
+        <td mat-cell *matCellDef="let element"> {{element.numOfPoints}} </td>
+      </ng-container>
+  
+       <!-- Class Column -->>
+       <ng-container matColumnDef="mean">
+        <th mat-header-cell *matHeaderCellDef > 均值(mV) </th>
+        <td mat-cell *matCellDef="let element"> {{element.mean}} </td>
+      </ng-container>
+  
+      <!-- Part Number Column -->
+      <ng-container matColumnDef="std">
+        <th mat-header-cell *matHeaderCellDef> 标准差(mV) </th>
+        <td mat-cell *matCellDef="let element"> {{element.std}} </td>
+      </ng-container>
+    
+  
+      <!-- Serial Number Column -->
+      <ng-container matColumnDef="startPointTime">
+        <th mat-header-cell *matHeaderCellDef >SPT(s)</th>
+        <td mat-cell *matCellDef="let element"> {{element.startPointTime}} </td>
+      </ng-container>
+  
+      <!-- Serial Number Column -->
+      <ng-container matColumnDef="responsePointTime">
+        <th mat-header-cell *matHeaderCellDef > RPT(s) </th>
+        <td mat-cell *matCellDef="let element"> {{element.responsePointTime}} </td>
+      </ng-container>
+  
+      <!-- Category Column -->
+      <ng-container matColumnDef="T90">
+          <th mat-header-cell *matHeaderCellDef > T90(s) </th>
+          <td mat-cell *matCellDef="let element"> {{element.T90}} </td>
+      </ng-container>
+  
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>   
+    </table>
+  
+  <div style="margin-left: 45%; margin-right:45%; width:10%; margin-top:20px;">
+      <button mat-raised-button color="warn" (click)="onCloseClick()">Close</button>
+  </div>

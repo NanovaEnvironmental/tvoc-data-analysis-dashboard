@@ -1,0 +1,21 @@
+<div class="container" appDnd (fileDropped)="onFileEvent($event)">
+    <div *ngIf="file; then thenBlock else elseBlock">
+    </div>
+
+    <ng-template #thenBlock> 
+        <p>{{file.name}}</p> 
+        <button mat-icon-button color="accent" (click)="deleteFile()">
+            <mat-icon>delete</mat-icon>
+        </button>
+        <button mat-icon-button color="accent" (click)="viewFile()">
+            <mat-icon>visibility</mat-icon>
+        </button>
+    </ng-template>
+
+    <ng-template #elseBlock>
+        <input type="file" #fileDropRef id="fileDropRef" (change)="onFileEvent($event.target.files)" />
+        <p>浓度值 {{concentration}}, 测试 {{numOfTest}} <br> 拖拽文件,或者</p>
+        <label for="fileDropRef">浏览文件夹</label>
+    </ng-template>
+</div>
+
