@@ -16,13 +16,19 @@ import { UtilService } from 'src/app/services/util/util.service';
 })
 export class FileVisualizationComponent implements OnInit {
 
+
   public chartOption: EChartsOption
   public dataSource: MatTableDataSource<nonBaselineResult|BaselineResult>
   public displayedColumns: string[] = ['PIDName', 'numOfPoints', 'mean', 'std', 'startPointTime', 'responsePointTime', 'T90']
+  private signal: Signal[]
+  private row: number
 
-  constructor(@Inject(MAT_DIALOG_DATA) signals: Signal[], private utilService: UtilService, private analysisService: AnalysisService,
-  private dialogRef: MatDialogRef<FileVisualizationComponent>, private dialogService: DialogService) { 
-    this.visualize(signals)
+  constructor(@Inject(MAT_DIALOG_DATA) data: any, private utilService: UtilService, private analysisService: AnalysisService,
+  private dialogRef: MatDialogRef<FileVisualizationComponent>, private dialogService: DialogService) {
+    console.log(data)
+    this.signal = data.signals
+    this.row = data.row
+    this.visualize(this.signal)
   }
 
   ngOnInit(): void {}
@@ -31,7 +37,6 @@ export class FileVisualizationComponent implements OnInit {
     let results: BaselineResult[] | nonBaselineResult[] = undefined
     try {
       results = this.analysisData(signals)
-      console.log(results)
       this.visualizeTable(signals, results)
     } catch (err) {
       this.dialogService.openMsgDialog(err)
@@ -96,11 +101,9 @@ export class FileVisualizationComponent implements OnInit {
   }
 
   private analysisData(signals: Signal[]): BaselineResult[] | nonBaselineResult[] {
-    let concentration = signals[0].concentration
     let items : BaselineResult[] | nonBaselineResult[] = [] 
     let parsedSignal = this.utilService.parseSignals(signals)
-    console.log(parsedSignal)
-    if (concentration == 0) items = this.analysisService.getPIDsNoise(parsedSignal.time, parsedSignal.intensities, parsedSignal.PIDNames, 150)
+    if (this.row == 1) items = this.analysisService.getPIDsNoise(parsedSignal.time, parsedSignal.intensities, parsedSignal.PIDNames, 150)
     
     else items = this.analysisService.getPIDsPerformance(parsedSignal.time, parsedSignal.intensities, parsedSignal.PIDNames, 150)
 
@@ -109,14 +112,12 @@ export class FileVisualizationComponent implements OnInit {
 
   private visualizeTable(signals: Signal[], results: BaselineResult[] | nonBaselineResult[]): void {
     /* every signal has the same concentraion */
-    let concentration = signals[0].concentration
-    
-    if (concentration == 0) this.displayedColumns = ['PIDName', 'numOfPoints', 'mean', 'std']
+
+    if (this.row == 1) this.displayedColumns = ['PIDName', 'numOfPoints', 'mean', 'std']
     else this.displayedColumns = ['PIDName', 'numOfPoints', 'mean', 'std', 'startPointTime', 'responsePointTime', 'T90']
 
     this.dataSource = new MatTableDataSource(results)
   }
-
 
   public onCloseClick(): void {
     this.dialogRef.close()

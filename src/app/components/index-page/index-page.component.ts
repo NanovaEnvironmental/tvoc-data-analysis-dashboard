@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { AbstractControl, FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { constants } from 'src/app/constants/constants';
 import { Config } from 'src/app/interfaces/config';
 import { Signal } from 'src/app/interfaces/signal';
@@ -23,8 +23,6 @@ export class IndexPageComponent implements OnInit {
 
   constructor(public formBuilder: FormBuilder, private dialogService: DialogService) { 
     this.form = this.buildForm()
-    console.log(this.concentrationNumberArray)
-    //console.log(this.concentrations)
   }
 
   ngOnInit(): void {
@@ -49,8 +47,7 @@ export class IndexPageComponent implements OnInit {
   get concentrationNumberArray(): number[] {
     let concentrations = []
     for (let i = 0; i < this.concentrationForms.controls.length; i++) {
-      let concentration: number =  (this.concentrationForms.controls[i] as any).controls.concentration.value
-      //let concentration = controls.controls.concentration.value
+      let concentration: number = parseFloat((this.concentrationForms.controls[i] as any).controls.concentration.value)
       concentrations.push(concentration)
     }
     return concentrations
@@ -83,7 +80,7 @@ export class IndexPageComponent implements OnInit {
         pids: this.buildPIDForm(constants.DEFAULT_NUM_OF_PID),
 
         numOfConcentration: [constants.DEFAULT_NUM_OF_CONCENTRATION, Validators.required],
-        concentrations: this.buildConcentrationForm(constants.DEFAULT_NUM_OF_CONCENTRATION, constants.DEFAULT_RANGE),
+        concentrations: this.buildConcentrationForm(constants.DEFAULT_NUM_OF_CONCENTRATION),
 
         range: [constants.DEFAULT_RANGE, Validators.required],
         numOfRepeatedTest: [constants.DEFAULT_REPEATED_TEST, Validators.required],
@@ -109,12 +106,11 @@ export class IndexPageComponent implements OnInit {
   }
 
 
-  private buildConcentrationForm(num: number, range: number): FormArray {
+  private buildConcentrationForm(num: Number): FormArray {
     let formArray: FormArray = new FormArray([])
-    let step = num == 1? 0: range / (num - 1)
     for (let i = 0; i< num; i++) {
       formArray.push(this.formBuilder.group({
-        concentration: [Math.floor(step * i), Validators.required]
+        concentration: [0, Validators.required]
       }))
     }
     return formArray
@@ -122,7 +118,7 @@ export class IndexPageComponent implements OnInit {
 
   public concentrationNumChanged($event) {
     let numOfConcentration = $event.value
-    this.form.controls.concentrations = this.buildConcentrationForm(numOfConcentration, this.range)
+    this.form.controls.concentrations = this.buildConcentrationForm(numOfConcentration)
 
     this.cleanFilesAndSignals(undefined, numOfConcentration)
   }
@@ -133,12 +129,7 @@ export class IndexPageComponent implements OnInit {
   }
 
   public rangeChanged($event): void {
-    let range = $event.value
-    this.cleanFilesAndSignals(undefined, undefined
-      )
-    if (this.concentrationForms.length == constants.DEFAULT_NUM_OF_CONCENTRATION) {
-      this.form.controls.concentrations = this.buildConcentrationForm(constants.DEFAULT_NUM_OF_CONCENTRATION, range)
-    }
+    this.cleanFilesAndSignals(undefined, undefined)
   }
 
   private buildFileForm(numOfRepeatedTest: number, numOfConcentration: number): FormArray {
@@ -168,11 +159,13 @@ export class IndexPageComponent implements OnInit {
   }
 
   public analysis() {
-    if (this.check(this.signals)) {
-      //let concentrations
-      this.dialogService.openFinalResultDialog(this.signals)
-    } else {
-      this.dialogService.openMsgDialog("文件缺省")
+    try {
+      this.detectInputError(this.signals, this.concentrationNumberArray)
+      console.log(this.concentrationNumberArray)
+      this.dialogService.openFinalResultDialog(this.signals, this.concentrationNumberArray)  
+    } catch (err) {
+      console.log(err)
+      this.dialogService.openMsgDialog(err.message)
     }
   }
 
@@ -183,20 +176,20 @@ export class IndexPageComponent implements OnInit {
     this.signals[row][column] = fileSignals
   }
 
-  public check(signals: Signal[][][]): boolean {
-    let isValid = true
-    try {
-      for (let i = 0; i < this.numOfConcentration; i++) {
-        for (let j = 0; j < this.numOfRepeatedTest; j++) {
-          for (let m = 0; m < this.numOfPID; m++) {
-            if (signals[i][j][m] == undefined) isValid = false
-          }
+  public detectInputError(signals: Signal[][][], concentrations: number[]): void {
+    for (let i = 0; i < this.numOfConcentration; i++) {
+      for (let j = 0; j < this.numOfRepeatedTest; j++) {
+        for (let m = 0; m < this.numOfPID; m++) {
+          if (signals[i] == undefined || signals[i][j] == undefined || signals[i][j][m] == undefined) throw new Error("文件缺省")
         }
       }
-    } catch(err) {
-      isValid = false
     }
-    return isValid
+    if (concentrations[0] != 0) throw new Error("第一个浓度值必须为零")
+
+    for (let i = 1; i < concentrations.length; i++) {
+      if (concentrations[i] == undefined) console.log("Hi")
+      if (concentrations[i] == 0 || isNaN(concentrations[i])) throw new Error("浓度值填写错误")
+    }   
   }
   
 

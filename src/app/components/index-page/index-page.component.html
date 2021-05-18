@@ -69,7 +69,7 @@
             <div>
               <app-upload-file-page  *ngFor="let file of subFiles.controls; let j = index" 
               [testConfig] = "buildTestConfig()"
-              [concentration] = "concentrationNumberArray[i]"
+              [row] = "i + 1"
               [numOfTest] = "j + 1"
               [ngStyle]="{width: fileBlockWidth + '%', height:fileBlockHeight + '%'}" 
               style="float: left;"

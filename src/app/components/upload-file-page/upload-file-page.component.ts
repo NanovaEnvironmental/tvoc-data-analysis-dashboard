@@ -13,7 +13,7 @@ import { UtilService } from 'src/app/services/util/util.service';
 export class UploadFilePageComponent implements OnInit {
 
   @Input('testConfig') configs: Config[]
-  @Input('concentration') concentration: number
+  @Input('row') row: number
   @Input('numOfTest') numOfTest: number
   @Output() fileChanged: EventEmitter<Signal[]> = new EventEmitter()
 
@@ -30,6 +30,7 @@ export class UploadFilePageComponent implements OnInit {
     try {
       let file = files[0]
       let signals = await this.tryToParseAndValidateFile(file)
+      console.log(signals)
       this.file = file
       this.signals = signals
       this.fileChanged.emit(signals)
@@ -53,8 +54,7 @@ export class UploadFilePageComponent implements OnInit {
       let intensity = this.tryToReadColumnFromFile(this.configs[i].column, content)
       if (intensity.length < constants.SELECT_AREA_WIDTH) throw new Error("文件行数小于设定阈值：" + constants.SELECT_AREA_WIDTH)
       let time = this.tryToReadColumnFromFile(2, content)
-      let signal = {'PIDName': name, 'intensity': this.formatIntensity(intensity), 'time': this.formatTime(time), 
-      'concentration': this.concentration, 'numOfTest': this.numOfTest}
+      let signal = {'PIDName': name, 'intensity': this.formatIntensity(intensity), 'time': this.formatTime(time), 'numOfTest': this.numOfTest}
       signals.push(signal)
     }
     return signals
@@ -76,7 +76,8 @@ export class UploadFilePageComponent implements OnInit {
   }
 
   public async viewFile() : Promise<void> {
-    this.dialogService.openFileVisualizationDialog(this.signals)
+    console.log(this.signals)
+    this.dialogService.openFileVisualizationDialog(this.signals, this.row)
   }
 
   /* time[i] = time[i] - time[0] */

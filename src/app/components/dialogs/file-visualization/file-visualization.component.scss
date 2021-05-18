@@ -16,6 +16,8 @@ mat-header-cell {
 
 td, th {
     text-align: center !important;
+    color:black;
+    font-size: inherit;
 }
 
 .mat-row:nth-child(odd) {

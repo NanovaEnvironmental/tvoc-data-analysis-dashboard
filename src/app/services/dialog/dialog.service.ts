@@ -12,11 +12,11 @@ export class DialogService {
 
   constructor(public dialog: MatDialog) { }
 
-  public openFileVisualizationDialog(signals: Signal[]) {
+  public openFileVisualizationDialog(signals: Signal[], row: number) {
     let dialogConfig = new MatDialogConfig()
-    dialogConfig.data = signals
+    dialogConfig.data = {'signals':signals, 'row': row}
     dialogConfig.width = "80%"
-    dialogConfig.height = "90%"
+    dialogConfig.height = "85%"
     return this.dialog.open(FileVisualizationComponent, dialogConfig)
   }
 
@@ -28,11 +28,11 @@ export class DialogService {
     return this.dialog.open(PopupComponent, dialogConfig)
   }
 
-  public openFinalResultDialog(signals: Signal[][][]) {
+  public openFinalResultDialog(signals: Signal[][][], concentrations: number[]) {
     let dialogConfig = new MatDialogConfig()
-    dialogConfig.data = signals
+    dialogConfig.data = {'signals': signals, 'concentrations': concentrations}
     dialogConfig.width = "100%"
-    dialogConfig.height = "90%"
+    dialogConfig.height = "100%"
     return this.dialog.open(FinalResultComponent, dialogConfig)
   }
 }
