@@ -15,6 +15,8 @@ export class UploadFilePageComponent implements OnInit {
   @Input('testConfig') configs: Config[]
   @Input('row') row: number
   @Input('numOfTest') numOfTest: number
+  @Input('concentration') concentration: number
+  
   @Output() fileChanged: EventEmitter<Signal[]> = new EventEmitter()
 
   public signals: Signal[]
