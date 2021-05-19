@@ -36,7 +36,6 @@ export class FinalResultComponent implements OnInit {
     private dialogService: DialogService, private dialogRef: MatDialogRef<FinalResultComponent>) { 
     this.signals = data.signals
     this.concentrations = data.concentrations
-    console.log(this.concentrations)
   }
 
   ngOnInit(): void {
@@ -122,7 +121,7 @@ export class FinalResultComponent implements OnInit {
     return {PIDName: PIDName, t90: this.utilService.formatT90(globalStatistic.globalT90), RSquare: globalStatistic.RSquare, range: 
       this.utilService.keepInt(globalStatistic.range), mdl: this.utilService.keepInt(globalStatistic.globalMDL), 
       sensitivity: this.utilService.formatSensitivity(globalStatistic.globalSensitivity), rsd: this.utilService.formatRSD(globalStatistic.globalRSD), 
-      noise: globalStatistic.concentrationDetails[0].mean, concentrationDetails: concentrationDetails}
+      noise: globalStatistic.concentrationDetails[0].std, concentrationDetails: concentrationDetails}
   }
 
   private getPIDNames(signals: Signal[][][]): string[] {
@@ -169,7 +168,6 @@ export class FinalResultComponent implements OnInit {
   }
 
   private stringifyConcentrationDetailsForResultTable(PIDData: any[]): string[] {
-    console.log(PIDData)
     let numOfConcentration = PIDData.length
     let results = []
     for (let i = 0; i < numOfConcentration; i++) {

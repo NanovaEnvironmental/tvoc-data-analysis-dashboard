@@ -31,7 +31,7 @@ export class DialogService {
   public openFinalResultDialog(signals: Signal[][][], concentrations: number[]) {
     let dialogConfig = new MatDialogConfig()
     dialogConfig.data = {'signals': signals, 'concentrations': concentrations}
-    dialogConfig.width = "100%"
+    dialogConfig.width = "120%"
     dialogConfig.height = "100%"
     return this.dialog.open(FinalResultComponent, dialogConfig)
   }

@@ -72,7 +72,8 @@ export class AnalysisService {
   private getT90(startPointIndex: number, responsePointIndex: number, time: number[]): number {
     let startPointTime = time[startPointIndex]
     let responsePointTime = time[responsePointIndex]
-    return parseFloat((responsePointTime - startPointTime).toFixed(1))
+
+    return responsePointTime - startPointTime
   }
  
   private getPIDPerformance(time: number[], intensity: number[], PIDName: string, windSize: number): nonBaselineResult {
@@ -89,7 +90,7 @@ export class AnalysisService {
 
   private getPIDNoise(time: number[], intensity: number[], PIDName: string, windSize: number): BaselineResult {
     let validArea = this.getValidAreaForBaselineTest(time.length, windSize)
-    let avgIntensity = parseFloat(this.utilService.getMeanNumber(intensity.slice(validArea[0], validArea[validArea.length - 1] + 1)).toFixed(0))
+    let avgIntensity = this.utilService.getMeanNumber(intensity.slice(validArea[0], validArea[validArea.length - 1] + 1))
     let std = this.utilService.getSTD(avgIntensity, intensity.slice(validArea[0], validArea[validArea.length - 1] + 1))
 
     let result = {PIDName: PIDName, numOfPoints: validArea.length, mean: avgIntensity, std: std, validArea: validArea}

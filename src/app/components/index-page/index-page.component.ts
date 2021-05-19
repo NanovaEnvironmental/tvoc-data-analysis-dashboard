@@ -161,7 +161,6 @@ export class IndexPageComponent implements OnInit {
   public analysis() {
     try {
       this.detectInputError(this.signals, this.concentrationNumberArray)
-      console.log(this.concentrationNumberArray)
       this.dialogService.openFinalResultDialog(this.signals, this.concentrationNumberArray)  
     } catch (err) {
       console.log(err)
@@ -187,7 +186,6 @@ export class IndexPageComponent implements OnInit {
     if (concentrations[0] != 0) throw new Error("第一个浓度值必须为零")
 
     for (let i = 1; i < concentrations.length; i++) {
-      if (concentrations[i] == undefined) console.log("Hi")
       if (concentrations[i] == 0 || isNaN(concentrations[i])) throw new Error("浓度值填写错误")
     }   
   }

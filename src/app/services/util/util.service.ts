@@ -35,7 +35,7 @@ export class UtilService {
   public getSTD(mean: number, values: number[]): number {
     let sum = 0
     for (let i = 0; i < values.length; i++) sum += (values[i] - mean) * (values[i] - mean) 
-    return parseFloat(Math.sqrt(sum / values.length).toFixed(3))
+    return Math.sqrt(sum / values.length)
   }
  
   public deepClone(object: Object): Object {
@@ -68,7 +68,7 @@ export class UtilService {
       let point = [concentrations[i], intensities[i]]
       points.push(point)
     }
-    let result = linear(points)
+    let result = linear(points, {precision:4})
     return {RSquare: result.r2, slope: result.equation[0], intercept: result.equation[1]}
   }
 
@@ -155,8 +155,6 @@ export class UtilService {
     return (value * 100).toFixed(2) + "%"
   }
   public formatDelta(value: number): string {
-    //let mark = '正'
-    //if (value < 0) mark = '负'
     return (value * 100).toFixed(1) + "%"
   }
 

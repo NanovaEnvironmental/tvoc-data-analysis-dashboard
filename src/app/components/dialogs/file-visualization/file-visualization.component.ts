@@ -25,7 +25,6 @@ export class FileVisualizationComponent implements OnInit {
 
   constructor(@Inject(MAT_DIALOG_DATA) data: any, private utilService: UtilService, private analysisService: AnalysisService,
   private dialogRef: MatDialogRef<FileVisualizationComponent>, private dialogService: DialogService) {
-    console.log(data)
     this.signal = data.signals
     this.row = data.row
     this.visualize(this.signal)
@@ -37,7 +36,7 @@ export class FileVisualizationComponent implements OnInit {
     let results: BaselineResult[] | nonBaselineResult[] = undefined
     try {
       results = this.analysisData(signals)
-      this.visualizeTable(signals, results)
+      this.visualizeTable(results)
     } catch (err) {
       this.dialogService.openMsgDialog(err)
     } finally {
@@ -110,7 +109,7 @@ export class FileVisualizationComponent implements OnInit {
     return items
   }
 
-  private visualizeTable(signals: Signal[], results: BaselineResult[] | nonBaselineResult[]): void {
+  private visualizeTable(results: BaselineResult[] | nonBaselineResult[]): void {
     /* every signal has the same concentraion */
 
     if (this.row == 1) this.displayedColumns = ['PIDName', 'numOfPoints', 'mean', 'std']

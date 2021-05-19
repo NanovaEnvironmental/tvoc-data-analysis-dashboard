@@ -16,7 +16,7 @@ export class UploadFilePageComponent implements OnInit {
   @Input('row') row: number
   @Input('numOfTest') numOfTest: number
   @Input('concentration') concentration: number
-  
+
   @Output() fileChanged: EventEmitter<Signal[]> = new EventEmitter()
 
   public signals: Signal[]
@@ -32,7 +32,6 @@ export class UploadFilePageComponent implements OnInit {
     try {
       let file = files[0]
       let signals = await this.tryToParseAndValidateFile(file)
-      console.log(signals)
       this.file = file
       this.signals = signals
       this.fileChanged.emit(signals)
@@ -56,7 +55,7 @@ export class UploadFilePageComponent implements OnInit {
       let intensity = this.tryToReadColumnFromFile(this.configs[i].column, content)
       if (intensity.length < constants.SELECT_AREA_WIDTH) throw new Error("文件行数小于设定阈值：" + constants.SELECT_AREA_WIDTH)
       let time = this.tryToReadColumnFromFile(2, content)
-      let signal = {'PIDName': name, 'intensity': this.formatIntensity(intensity), 'time': this.formatTime(time), 'numOfTest': this.numOfTest}
+      let signal = {'PIDName': name, 'intensity': intensity, 'time': this.formatTime(time), 'numOfTest': this.numOfTest}
       signals.push(signal)
     }
     return signals
@@ -78,7 +77,6 @@ export class UploadFilePageComponent implements OnInit {
   }
 
   public async viewFile() : Promise<void> {
-    console.log(this.signals)
     this.dialogService.openFileVisualizationDialog(this.signals, this.row)
   }
 
@@ -86,17 +84,9 @@ export class UploadFilePageComponent implements OnInit {
   private formatTime(time: number[]): number[] {
     let formattedTime = []
     for (let i = 0; i < time.length; i++) {
-      formattedTime.push(parseFloat(((time[i] - time[0]) / 1000).toFixed(1)))
+     formattedTime.push((time[i] - time[0]) / 1000)
     }
     return formattedTime
-  }
-
-  private formatIntensity(intensity: number[]): number[] {
-    let formattedIntensity = []
-    for (let i = 0; i < intensity.length; i++) {
-      formattedIntensity.push(parseFloat(intensity[i].toFixed(2)))
-    }
-    return formattedIntensity
   }
 
 }
