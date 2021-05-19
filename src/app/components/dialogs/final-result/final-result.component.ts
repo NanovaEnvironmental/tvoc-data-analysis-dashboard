@@ -101,7 +101,7 @@ export class FinalResultComponent implements OnInit {
       items.push(this.generateRowForResultTable(i, testInfo.PIDNames[i], testInfo.concentrations, testResult))
     } 
     this.ResultTableDataSource = new MatTableDataSource(items)
-    this.populateDisplayedColumns(this.resultTableDisplayedColumns, ['PIDName','T90', 'RSquare', 'range', 'mdl', 'sensitivity', 'rsd', 'noise'], testInfo.concentrations)
+    this.populateDisplayedColumns(this.resultTableDisplayedColumns, ['PIDName','T90', 'RSquare', 'range', 'mdl', 'sensitivity', 'rsd', 'change', 'noise'], testInfo.concentrations)
   }
 
   private generateRowForResultTable(PIDIndex: number, PIDName: string, concentrations: number[], testResult: any[]): any {
@@ -115,13 +115,10 @@ export class FinalResultComponent implements OnInit {
     let globalStatistic = this.utilService.getPIDGlobalStatistic(PIDData, concentrations)
     let concentrationDetails = this.stringifyConcentrationDetailsForResultTable(globalStatistic.concentrationDetails)
 
-    /* (last mean - first mean) / first mean*/
-    let change = (globalStatistic.concentrationDetails[concentrations.length - 1].mean - globalStatistic.concentrationDetails[0].mean) / globalStatistic.concentrationDetails[0].mean
-
     return {PIDName: PIDName, t90: this.utilService.formatT90(globalStatistic.globalT90), RSquare: globalStatistic.RSquare, range: 
       this.utilService.keepInt(globalStatistic.range), mdl: this.utilService.keepInt(globalStatistic.globalMDL), 
       sensitivity: this.utilService.formatSensitivity(globalStatistic.globalSensitivity), rsd: this.utilService.formatRSD(globalStatistic.globalRSD), 
-      noise: globalStatistic.concentrationDetails[0].std, concentrationDetails: concentrationDetails}
+      change: this.utilService.formatDelta(globalStatistic.globalChange), noise: globalStatistic.concentrationDetails[0].std, concentrationDetails: concentrationDetails}
   }
 
   private getPIDNames(signals: Signal[][][]): string[] {

@@ -39,12 +39,12 @@
     </ng-container>
 
     <ng-container matColumnDef="range">
-        <th mat-header-cell *matHeaderCellDef> 检测上限(ppm) </th>
+        <th mat-header-cell *matHeaderCellDef> 上限(ppm) </th>
         <td mat-cell *matCellDef="let element"> {{element.range}} </td>
     </ng-container>
 
     <ng-container matColumnDef="mdl">
-        <th mat-header-cell *matHeaderCellDef> 检测下限(ppb) </th>
+        <th mat-header-cell *matHeaderCellDef> 下限(ppb) </th>
         <td mat-cell *matCellDef="let element"> {{element.mdl}} </td>
     </ng-container>
 
@@ -54,19 +54,22 @@
     </ng-container>
 
     <ng-container matColumnDef="rsd">
-        <th mat-header-cell *matHeaderCellDef> RSD </th>
+        <th mat-header-cell *matHeaderCellDef> Avg RSD </th>
         <td mat-cell *matCellDef="let element"> {{element.rsd}} </td>
     </ng-container>
 
+    <ng-container matColumnDef="change">
+        <th mat-header-cell *matHeaderCellDef> Avg 改变 </th>
+        <td mat-cell *matCellDef="let element"> {{element.change}} </td>
+    </ng-container>
   
     <ng-container matColumnDef="noise">
         <th mat-header-cell *matHeaderCellDef> 噪声(mv) </th>
         <td mat-cell *matCellDef="let element"> {{element.noise | number: '1.0-3'}} </td>
     </ng-container>
-
   
     <ng-container *ngFor="let concentration of concentrations; let i = index" matColumnDef=  "concentration{{ i + 1}}">
-        <th mat-header-cell *matHeaderCellDef> {{concentration}}ppm {{i == 0? "(均值 / 标准差 / 变化)": (i == 1? "(均值 / T90 / 下限 / RSD / 变化)": "")}}</th>
+        <th mat-header-cell *matHeaderCellDef> {{concentration}}ppm {{i == 0? "(均值 / 标准差 / 改变)": (i == 1? "(均值 / T90 / 下限 / RSD / 改变)": "")}}</th>
         <td mat-cell *matCellDef="let element"> {{element.concentrationDetails[i]}} </td>
     </ng-container>
  

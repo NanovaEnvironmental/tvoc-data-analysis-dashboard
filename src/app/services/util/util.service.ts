@@ -136,7 +136,7 @@ export class UtilService {
     }
 
     return {globalT90: this.getMeanNumber(T90s), RSquare: linearModel.RSquare, meanNoise: meanNoise, range: range, globalMDL: this.getMaxNumber(mdls), 
-      globalSensitivity: this.getMeanNumber(sensitivities), globalRSD: this.getMaxNumber(RSDs), concentrationDetails: concentrationDetails}
+      globalSensitivity: this.getMeanNumber(sensitivities), globalRSD: this.getMeanNumber(RSDs), globalChange: this.getMeanNumber(intensitiesDelta.slice(1, numOfConcentration)), concentrationDetails: concentrationDetails}
   }
 
   public formatSTD(value: number): number {
