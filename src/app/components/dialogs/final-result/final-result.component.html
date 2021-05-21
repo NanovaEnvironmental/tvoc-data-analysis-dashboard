@@ -1,18 +1,18 @@
-<h2 style="text-align: center;">测试数据表</h2>
+<h2 style="text-align: center;">详细数据表</h2>
 <table mat-table [dataSource]="DatailTableDataSource" matSort  class="mat-elevation-z8">
     <!-- ID Column -->
     <ng-container matColumnDef="PIDName">
-        <th mat-header-cell *matHeaderCellDef> PID名称 </th>
+        <th mat-header-cell *matHeaderCellDef> {{detailTableHeader[0]}} </th>
         <td mat-cell *matCellDef="let element"> {{element.PIDName}} </td>
     </ng-container>
 
     <ng-container matColumnDef="numOfTest">
-        <th mat-header-cell *matHeaderCellDef> 重复测试次数 </th>
+        <th mat-header-cell *matHeaderCellDef> {{detailTableHeader[1]}} </th>
         <td mat-cell *matCellDef="let element"> {{element.numOfTest}} </td>
     </ng-container>
 
     <ng-container *ngFor="let concentration of concentrations; let i = index" matColumnDef=  "concentration{{ i + 1}}">
-        <th mat-header-cell *matHeaderCellDef> {{concentrations[i]}}ppm {{concentrations[i] == 0? "(均值,  标准差)": "(均值,  标准差,  SPT,  RPT,  T90)"}} </th>
+        <th mat-header-cell *matHeaderCellDef> {{detailTableHeader[i + 2]}} </th>
         <td mat-cell *matCellDef="let element"> {{element.results[i]}} </td>
     </ng-container>
 
@@ -20,51 +20,68 @@
     <tr mat-row *matRowDef="let row; columns: detailTableDisplayedColumns;"></tr>   
 </table>
 
-<h2 style="text-align: center;">测试结果表</h2>
+<h2 style="text-align: center;">最终结果表</h2>
 <table mat-table [dataSource]="ResultTableDataSource" matSort  class="mat-elevation-z8">
     <!-- ID Column -->
     <ng-container matColumnDef="PIDName">
-        <th mat-header-cell *matHeaderCellDef> PID名称 </th>
+        <th mat-header-cell *matHeaderCellDef> {{resultTableHeader[0]}} </th>
         <td mat-cell *matCellDef="let element"> {{element.PIDName}} </td>
     </ng-container>
 
     <ng-container matColumnDef="T90">
-        <th mat-header-cell *matHeaderCellDef> T90 </th>
+        <th mat-header-cell *matHeaderCellDef>{{resultTableHeader[1]}} </th>
         <td mat-cell *matCellDef="let element"> {{element.t90}} </td>
     </ng-container>
 
     <ng-container matColumnDef="RSquare">
-        <th mat-header-cell *matHeaderCellDef> R^2 </th>
-        <td mat-cell *matCellDef="let element"> {{element.rsquare}} </td>
+        <th mat-header-cell *matHeaderCellDef> {{resultTableHeader[2]}} </th>
+        <td mat-cell *matCellDef="let element"> {{element.RSquare}} </td>
     </ng-container>
 
     <ng-container matColumnDef="range">
-        <th mat-header-cell *matHeaderCellDef> 检测上限 </th>
+        <th mat-header-cell *matHeaderCellDef> {{resultTableHeader[3]}} </th>
         <td mat-cell *matCellDef="let element"> {{element.range}} </td>
     </ng-container>
 
     <ng-container matColumnDef="mdl">
-        <th mat-header-cell *matHeaderCellDef> 检测下限 </th>
+        <th mat-header-cell *matHeaderCellDef> {{resultTableHeader[4]}} </th>
         <td mat-cell *matCellDef="let element"> {{element.mdl}} </td>
     </ng-container>
 
     <ng-container matColumnDef="sensitivity">
-        <th mat-header-cell *matHeaderCellDef> 灵敏度 </th>
+        <th mat-header-cell *matHeaderCellDef> {{resultTableHeader[5]}} </th>
         <td mat-cell *matCellDef="let element"> {{element.sensitivity}} </td>
     </ng-container>
 
     <ng-container matColumnDef="rsd">
-        <th mat-header-cell *matHeaderCellDef> RSD </th>
+        <th mat-header-cell *matHeaderCellDef> {{resultTableHeader[6]}} </th>
         <td mat-cell *matCellDef="let element"> {{element.rsd}} </td>
     </ng-container>
 
+    <ng-container matColumnDef="change">
+        <th mat-header-cell *matHeaderCellDef> {{resultTableHeader[7]}} </th>
+        <td mat-cell *matCellDef="let element"> {{element.change}} </td>
+    </ng-container>
+  
+    <ng-container matColumnDef="noise">
+        <th mat-header-cell *matHeaderCellDef> {{resultTableHeader[8]}} </th>
+        <td mat-cell *matCellDef="let element"> {{element.noise}} </td>
+    </ng-container>
+  
     <ng-container *ngFor="let concentration of concentrations; let i = index" matColumnDef=  "concentration{{ i + 1}}">
-        <th mat-header-cell *matHeaderCellDef> {{concentrations[i]}}ppm </th>
-        <td mat-cell *matCellDef="let element"> {{element.results[i]}} </td>
+        <th mat-header-cell *matHeaderCellDef> {{resultTableHeader[i + 9]}}</th>
+        <td mat-cell *matCellDef="let element"> {{element.concentrationDetails[i]}} </td>
     </ng-container>
  
     <tr mat-header-row *matHeaderRowDef="resultTableDisplayedColumns"></tr>
     <tr mat-row *matRowDef="let row; columns: resultTableDisplayedColumns;"></tr>   
 </table>
-
    
+<div mat-dialog-actions style="margin-left:40%; margin-right: 40%; text-align: center; margin-top: 30px;">
+    <div style="width: 50%;">
+        <button mat-raised-button color="primary" (click)="onDownloadClick()">下载</button>
+    </div>
+    <div style="width: 50%;">
+        <button mat-raised-button color="warn" (click)="onCloseClick()">关闭</button>
+    </div>
+</div>

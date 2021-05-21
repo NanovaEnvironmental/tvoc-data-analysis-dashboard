@@ -10,6 +10,7 @@ export class AnalysisService {
 
   constructor(private utilService: UtilService) { }
 
+/*---------------------------Helper Method For Analysis a Single File--------------------------------------------------------- */
   private getValidArea(intensity: number[], windSize: number): number[] {
       let endPointIndex = this.getEndPointIndex(intensity)
       if (endPointIndex - windSize + 1 < 0) throw new Error("定位到结束点, 但是无法获取有效计算区域")
@@ -71,13 +72,14 @@ export class AnalysisService {
   private getT90(startPointIndex: number, responsePointIndex: number, time: number[]): number {
     let startPointTime = time[startPointIndex]
     let responsePointTime = time[responsePointIndex]
-    return parseFloat((responsePointTime - startPointTime).toFixed(1))
+
+    return responsePointTime - startPointTime
   }
  
   private getPIDPerformance(time: number[], intensity: number[], PIDName: string, windSize: number): nonBaselineResult {
       let startPointIndex = this.getStartPointIndex(intensity)
       let validArea = this.getValidArea(intensity, windSize)
-      let avgIntensity = this.utilService.getMeanNumber(intensity.slice(validArea[0], validArea[validArea.length - 1] + 1))
+      let avgIntensity = parseFloat(this.utilService.getMeanNumber(intensity.slice(validArea[0], validArea[validArea.length - 1] + 1)).toFixed(0))
       let responsePointIndex = this.getResponsePointIndex(intensity, startPointIndex, avgIntensity)
       let T90 = this.getT90(startPointIndex, responsePointIndex, time)
       let std = this.utilService.getSTD(avgIntensity, intensity.slice(validArea[0], validArea[validArea.length - 1] + 1))
@@ -112,5 +114,7 @@ export class AnalysisService {
     }
     return results
   }
+ 
+  
 
 }

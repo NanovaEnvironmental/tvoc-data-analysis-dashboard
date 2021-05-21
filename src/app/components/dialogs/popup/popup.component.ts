@@ -11,7 +11,6 @@ export class PopupComponent implements OnInit {
   public msg: string
   constructor(@Inject(MAT_DIALOG_DATA) msg: string, private dialogRef: MatDialogRef<PopupComponent>) { 
     this.msg = msg
-    console.log(msg)
   }
 
   ngOnInit(): void {
