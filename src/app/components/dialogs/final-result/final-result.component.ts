@@ -1,6 +1,7 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { constants } from 'src/app/constants/constants';
 import { Signal } from 'src/app/interfaces/signal';
 import { AnalysisService } from 'src/app/services/analysis/analysis.service';
@@ -17,6 +18,10 @@ export class FinalResultComponent implements OnInit {
   public signals: Signal[][][]
   public concentrations: number[]
   private testResults = []
+  private testInfo: any
+
+  public detailTableHeader : string[] = []
+  public resultTableHeader: string[] = []
 
   private signalsMatrixRows(): number {
     return this.signals.length
@@ -33,7 +38,7 @@ export class FinalResultComponent implements OnInit {
   public resultTableDisplayedColumns: string[] = []
 
   constructor(@Inject(MAT_DIALOG_DATA) data: any, private analysisService: AnalysisService, private utilService: UtilService, 
-    private dialogService: DialogService, private dialogRef: MatDialogRef<FinalResultComponent>) { 
+    private dialogService: DialogService, private dialogRef: MatDialogRef<FinalResultComponent>, private sanitizer: DomSanitizer) { 
     this.signals = data.signals
     this.concentrations = data.concentrations
   }
@@ -41,17 +46,17 @@ export class FinalResultComponent implements OnInit {
   ngOnInit(): void {
     try {
       this.testResults = this.initializeResultMatrix(this.signals)
-      let testInfo = this.parseSignals(this.signals)
-      this.visualizeDetailTable(testInfo, this.testResults)
-      this.visualizeResultTable(testInfo, this.testResults)
+
+      /* {PIDNames: [PID1, PID2], concentrations: [0, 50, 100], numOfRepeatedTest: 2} */
+      this.testInfo = {PIDNames: this.getPIDNames(this.signals), concentrations: this.concentrations, numOfRepeatedTest: this.getNumOfRepeatedTest(this.signals)}
+
+      this.visualizeDetailTable(this.testInfo, this.testResults)
+      this.visualizeResultTable(this.testInfo, this.testResults)
     } catch(err) {
+      console.log(err)
       let msg = err.msg == undefined? "未知错误":err.msg
       this.dialogService.openMsgDialog(msg)
     }
-  }
-
-  private parseSignals(signals: Signal[][][]): any {
-    return {PIDNames: this.getPIDNames(signals), concentrations: this.concentrations, numOfRepeatedTest: this.getNumOfRepeatedTest(signals)}
   }
 
   private initializeResultMatrix(signals: Signal[][][]) {
@@ -78,20 +83,30 @@ export class FinalResultComponent implements OnInit {
       for (let j = 0; j < testInfo.numOfRepeatedTest; j++) {
         /* e.g. PID1在所有浓度下的第四次测试数据 */
         let PIDData = this.getPIDDataByPIDIndexAndTestID(i, j, testResult)
+
+        //  {PIDName: PID1, numOfTest: 1, results: ["mean-std", "mean-t90", "mean-t90"]}
         items.push(this.generateRowForDetailTable(testInfo.PIDNames[i], j + 1, PIDData))
       }
     }
     this.DatailTableDataSource = new MatTableDataSource(items)
-    this.populateDisplayedColumns(this.detailTableDisplayedColumns, ['PIDName', 'numOfTest'], testInfo.concentrations)
+
+    // "PIDName", "numOfTest", "concentration1", "concentration2"
+    this.detailTableDisplayedColumns = this.generateDetailTableColumn(testInfo)
+
+     // "PID名称", "重复测试次数", "0ppm (均值 / 标准差) ", "50ppm (均值 / T90) "
+    this.detailTableHeader = this.generateDetailTableHeader(testInfo)
   }
 
-   /**
-    * @param data e.g. PID1在所有浓度下的第四次测试数据
-    * @returns 
-    */
   private generateRowForDetailTable(PIDName: string, testID: number, PIDData: any[]): any {
-   //["mean-std", "mean-t90", "mean-t90"]
-    let results = this.stringifyConcentrationDetailsForDetailTable(PIDData)
+    let numOfConcentration = PIDData.length
+    let results = []
+    for (let i = 0; i < numOfConcentration; i++) {
+      if (i == 0) results.push([this.utilService.keepInt(PIDData[i].mean), this.utilService.formatSTD(PIDData[i].std)].join(constants.SEPERATOR))
+      else results.push([this.utilService.keepInt(PIDData[i].mean), this.utilService.formatT90(PIDData[i].T90)].join(constants.SEPERATOR))
+    }
+    results
+
+    // {PIDName: PID1, numOfTest: 1, results: ["mean-std", "mean-t90", "mean-t90"]}
     return {PIDName: PIDName, numOfTest: testID, results: results}
   }
   
@@ -101,24 +116,77 @@ export class FinalResultComponent implements OnInit {
       items.push(this.generateRowForResultTable(i, testInfo.PIDNames[i], testInfo.concentrations, testResult))
     } 
     this.ResultTableDataSource = new MatTableDataSource(items)
-    this.populateDisplayedColumns(this.resultTableDisplayedColumns, ['PIDName','T90', 'RSquare', 'range', 'mdl', 'sensitivity', 'rsd', 'change', 'noise'], testInfo.concentrations)
+    this.resultTableDisplayedColumns = this.generateResultTableColumn(testInfo)
+    this.resultTableHeader = this.generateResultTableHeader(testInfo)
+  }
+
+  private generateDetailTableColumn(testInfo: any) : string[] {
+    // "PIDName", "numOfTest", "concentration1", "concentration2"
+    return this.populateDisplayedColumns(['PIDName', 'numOfTest'], testInfo.concentrations)
+  }
+
+  private generateDetailTableHeader(testInfo: any): string[] {
+     // "PIDName", "numOfTest", "concentration1", "concentration2"
+     let column = this.generateDetailTableColumn(testInfo)
+
+     for (let i = 0; i < column.length; i++) {
+       if (i == 0) column[i] = "PID名称"
+       else if (i == 1) column[i] = "重复测试次数"
+       else if (i == 2) column[i] = this.concentrations[i - 2] + 'ppm' + "(均值 / 标准差)"
+       else if (i == 3) column[i] = this.concentrations[i - 2] + 'ppm' + "(均值 / T90)"
+       else column[i] = this.concentrations[i - 2] + 'ppm'
+     }
+     return column
+  }
+
+  private generateResultTableColumn(testInfo: any): string[] {
+    return  this.populateDisplayedColumns(['PIDName','T90', 'RSquare', 'range', 'mdl', 'sensitivity', 'rsd', 'change','noise'], testInfo.concentrations)
+  }
+
+  private generateResultTableHeader(testInfo: any): string[] {
+    let column = this.generateResultTableColumn(testInfo)
+    for (let i = 0; i < column.length; i++) {
+      if (i == 0) column[i] = "PID名称"
+      else if (i == 1) column[i] = "Avg T90(s)"
+      else if (i == 2) column[i] = "R^2"
+      else if (i == 3) column[i] = "上限(ppm)"
+      else if (i == 4) column[i] = "下限(ppb)"
+      else if (i == 5) column[i] = "灵敏度(mV/ppm)"
+      else if (i == 6) column[i] = "Avg RSD"
+      else if (i == 7) column[i] = "Avg 改变"
+      else if (i == 8) column[i] = "噪声(mV)"
+      else if (i == 9) column[i] = this.concentrations[i - 9] + 'ppm' + "(均值 / 标准差 / 改变)"
+      else if (i == 10) column[i] = this.concentrations[i - 9] + 'ppm' + "(均值 / T90 / 下限 / RSD / 改变)"
+      else column[i] = this.concentrations[i - 9] + 'ppm'
+    }
+    return column
   }
 
   private generateRowForResultTable(PIDIndex: number, PIDName: string, concentrations: number[], testResult: any[]): any {
-    /*compared to this.results,  each cell of signlePIDResult is one dimensional
-     * e.g. PID1在所有浓度下的所有重复测试数据, height is num of concentrations and width is num of repeated test. singlePIDResult[0]表示在第一个浓度下的测试结果 
-     * PID1零浓度下的测试数据（两次重复实验） singlePIDResult[0]: [{PIDName:PID1，numOfPoints:150, mean: 20},{PIDName:PID1, numOfPoints:150, mean: 20}]
-     * PID1两千浓度下测试数据（两次重复实验） signlePIDResult[1]: [{PIDName:PID1, numOfPoints:150, mean: 30, t90:20}, {PIDName:PID1, numOfPoints:150, mean: 30, t90:20}]
+    /*compared to this.results,  each cell of PIDData is one dimensional
+     * e.g. PID1在所有浓度下的所有重复测试数据, height is num of concentrations and width is num of repeated test. PIDData[0]表示在第一个浓度下的测试结果 
+     * PID1零浓度下的测试数据（两次重复实验） PIDData[0]: [{PIDName:PID1，numOfPoints:150, mean: 20},{PIDName:PID1, numOfPoints:150, mean: 20}]
+     * PID1两千浓度下测试数据（两次重复实验） PIDData[1]: [{PIDName:PID1, numOfPoints:150, mean: 30, t90:20}, {PIDName:PID1, numOfPoints:150, mean: 30, t90:20}]
      */
     let PIDData = this.getPIDDataByPIDIndex(PIDIndex, concentrations.length, testResult)
    
     let globalStatistic = this.utilService.getPIDGlobalStatistic(PIDData, concentrations)
-    let concentrationDetails = this.stringifyConcentrationDetailsForResultTable(globalStatistic.concentrationDetails)
+
+    let concentrationDetails = globalStatistic.concentrationDetails
+
+    let numOfConcentration = concentrationDetails.length
+    let results = []
+    for (let i = 0; i < numOfConcentration; i++) {
+      if (i == 0) results.push([this.utilService.keepInt(concentrationDetails[i].mean), this.utilService.formatSTD(concentrationDetails[i].std), this.utilService.formatDelta(concentrationDetails[i].change)].join(constants.SEPERATOR))
+      
+      else results.push([this.utilService.keepInt(concentrationDetails[i].mean), this.utilService.formatT90(concentrationDetails[i].T90), this.utilService.keepInt(concentrationDetails[i].MDL), 
+      this.utilService.formatRSD(concentrationDetails[i].RSD), this.utilService.formatDelta(concentrationDetails[i].change)].join(constants.SEPERATOR))
+    }    
 
     return {PIDName: PIDName, t90: this.utilService.formatT90(globalStatistic.globalT90), RSquare: globalStatistic.RSquare, range: 
       this.utilService.keepInt(globalStatistic.range), mdl: this.utilService.keepInt(globalStatistic.globalMDL), 
       sensitivity: this.utilService.formatSensitivity(globalStatistic.globalSensitivity), rsd: this.utilService.formatRSD(globalStatistic.globalRSD), 
-      change: this.utilService.formatDelta(globalStatistic.globalChange), noise: globalStatistic.concentrationDetails[0].std, concentrationDetails: concentrationDetails}
+      change: this.utilService.formatDelta(globalStatistic.globalChange), noise: this.utilService.formatSTD(globalStatistic.concentrationDetails[0].std), concentrationDetails: results}
   }
 
   private getPIDNames(signals: Signal[][][]): string[] {
@@ -133,13 +201,11 @@ export class FinalResultComponent implements OnInit {
     return signals[0].length
   }
 
-  private populateDisplayedColumns(displayedColumnArray: string[], nonConcentrationColumns: string[], concentrationColumns: number[]): void {
+  private populateDisplayedColumns(nonConcentrationColumns: string[], concentrationColumns: number[]): string[] {
+    let displayedColumnArray = []
     for (let i = 0; i < nonConcentrationColumns.length; i++) displayedColumnArray.push(nonConcentrationColumns[i])
     for (let i = 0; i < concentrationColumns.length; i++) displayedColumnArray.push("concentration" + (i + 1))
-  }
-
-  public onCloseClick() :void {
-    this.dialogRef.close()
+    return displayedColumnArray
   }
 
   private getPIDDataByPIDIndexAndTestID(PIDIndex: number, testID: number, testResult: any[]): any[] {
@@ -154,25 +220,53 @@ export class FinalResultComponent implements OnInit {
     return PIDData
   }
 
-  private stringifyConcentrationDetailsForDetailTable(PIDData: any[]) : string[] {
-    let numOfConcentration = PIDData.length
-    let results = []
-    for (let i = 0; i < numOfConcentration; i++) {
-      if (i == 0) results.push([this.utilService.keepInt(PIDData[i].mean), this.utilService.formatSTD(PIDData[i].std)].join(constants.SEPERATOR))
-      else results.push([this.utilService.keepInt(PIDData[i].mean), this.utilService.formatT90(PIDData[i].T90)].join(constants.SEPERATOR))
-    }
-    return results
+  public onDownloadClick() : void {
+    const a = document.createElement('a');
+    document.body.appendChild(a);
+    let detaileTableContent = this.stringifyDetailTable(this.testInfo, this.testResults)
+    let resultTableContent = this.stringifyResultTable(this.testInfo, this.testResults)
+    let fileContent = [detaileTableContent, '', resultTableContent].join('\n')
+
+    const blob = new Blob([fileContent], { type: 'application/vnd.ms-excel' }),
+    url = window.URL.createObjectURL(blob);
+
+    a.href = url;
+    a.download = this.testInfo.PIDNames.join('_')  + '_result.csv';
+    a.click();
+    window.URL.revokeObjectURL(url);
   }
 
-  private stringifyConcentrationDetailsForResultTable(PIDData: any[]): string[] {
-    let numOfConcentration = PIDData.length
-    let results = []
-    for (let i = 0; i < numOfConcentration; i++) {
-      if (i == 0) results.push([this.utilService.keepInt(PIDData[i].mean), this.utilService.formatSTD(PIDData[i].std), this.utilService.formatDelta(PIDData[i].change)].join(constants.SEPERATOR))
-      
-      else results.push([this.utilService.keepInt(PIDData[i].mean), this.utilService.formatT90(PIDData[i].T90), this.utilService.keepInt(PIDData[i].MDL), 
-      this.utilService.formatRSD(PIDData[i].RSD), this.utilService.formatDelta(PIDData[i].change)].join(constants.SEPERATOR))
+  private stringifyDetailTable(testInfo: any, testResult: any[]): string {
+    let rows = [this.detailTableHeader.join(',')]
+
+    for (let i = 0; i < testInfo.PIDNames.length; i++) {
+      for (let j = 0; j < testInfo.numOfRepeatedTest; j++) {
+        let PIDData = this.getPIDDataByPIDIndexAndTestID(i, j, testResult)
+
+        let rowData = this.generateRowForDetailTable(testInfo.PIDNames[i], j + 1, PIDData)
+
+        let row = [rowData.PIDName, rowData.numOfTest].concat(rowData.results).join(',')
+        rows.push(row)
+      }
     }
-    return results
+    return rows.join('\n')
+  }
+
+  private stringifyResultTable(testInfo: any, testResult: any[]): string {
+    let rows = [this.resultTableHeader.join(',')]
+    
+    for (let i = 0; i < testInfo.PIDNames.length; i++) {
+     let rowData = this.generateRowForResultTable(i, testInfo.PIDNames[i], testInfo.concentrations, testResult)
+     let row = [rowData.PIDName, rowData.t90, rowData.RSquare, rowData.range, rowData.mdl, rowData.sensitivity, rowData.rsd, 
+      rowData.change, rowData.noise].concat(rowData.concentrationDetails).join(',')
+
+      rows.push(row)
+    }
+    
+    return rows.join('\n')
+  }
+
+  public onCloseClick() :void {
+    this.dialogRef.close()
   }
 }
