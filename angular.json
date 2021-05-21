@@ -70,7 +70,7 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
             "browserTarget": "tvoc-analysis-dashboard:build",
-            "port": 4202
+            "port": 4201
           },
           "configurations": {
             "production": {
