@@ -2,6 +2,7 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
 import { EChartsOption } from 'echarts';
+import { constants } from 'src/app/constants/constants';
 import { BaselineResult } from 'src/app/interfaces/result/baselineResult/baseline-result';
 import { nonBaselineResult } from 'src/app/interfaces/result/nonBaselineResult/nonBaselineResult';
 import { Signal } from 'src/app/interfaces/signal';
@@ -22,12 +23,17 @@ export class FileVisualizationComponent implements OnInit {
   public displayedColumns: string[] = ['PIDName', 'numOfPoints', 'mean', 'std', 'startPointTime', 'responsePointTime', 'T90']
   private signal: Signal[]
   private row: number
+  private windSizeArr: number[] = []
+  public PIDNames: string[] = []
 
   constructor(@Inject(MAT_DIALOG_DATA) data: any, private utilService: UtilService, private analysisService: AnalysisService,
   private dialogRef: MatDialogRef<FileVisualizationComponent>, private dialogService: DialogService) {
     this.signal = data.signals
     this.row = data.row
+    this.windSizeArr = data.windSizeArr
+    this.signal.forEach(item => this.PIDNames.push(item.PIDName))
     this.visualize(this.signal)
+    dialogRef.beforeClosed().subscribe(() => dialogRef.close(this.windSizeArr))
   }
 
   ngOnInit(): void {}
@@ -35,7 +41,9 @@ export class FileVisualizationComponent implements OnInit {
   private visualize(signals: Signal[]): void {
     let results: BaselineResult[] | nonBaselineResult[] = undefined
     try {
-      results = this.analysisData(signals)
+      // If the window size has already been set for all values, use the updated size
+      results = this.getDataAnalysis(signals)
+
       this.visualizeTable(results)
     } catch (err) {
       this.dialogService.openMsgDialog(err)
@@ -71,10 +79,27 @@ export class FileVisualizationComponent implements OnInit {
     let series = []
     for (let i = 0; i < signals.length; i++) {
       let markPoints = results == undefined? undefined: this.buildMarkPoints(signals[i].time, signals[i].intensity, this.findMarkPointsIndex(results[i]))
+      this.setWindowSizeArray(results[i], i)
       let item = {symbol: "none", name: signals[i].PIDName, data:signals[i].intensity, markPoint: markPoints, type: 'line'}
       series.push(item)
     }
     return series
+  }
+
+  private setWindowSizeArray(result: BaselineResult | nonBaselineResult, i: number): void {
+    let index = result.validArea
+    let offset = this.row == 1? 1 : 3
+    this.windSizeArr[2*i] = index[0]/10
+    this.windSizeArr[2*i + 1] = index[index.length - offset]/10
+  }
+
+  private getDataAnalysis(signals: Signal[]): BaselineResult[] | nonBaselineResult[] {
+    let results: BaselineResult[] | nonBaselineResult[] = undefined
+
+    if (this.windSizeArr.length != 2*signals.length) results = this.analysisData(signals)// If Window Array is not full, use normal method
+    else results = this.updateAnalysisData(signals)// if Window Array is full, use method for updated windows
+
+    return results
   }
 
   private findMarkPointsIndex(result: BaselineResult | nonBaselineResult): number[] {
@@ -102,9 +127,9 @@ export class FileVisualizationComponent implements OnInit {
   private analysisData(signals: Signal[]): BaselineResult[] | nonBaselineResult[] {
     let items : BaselineResult[] | nonBaselineResult[] = [] 
     let parsedSignal = this.utilService.parseSignals(signals)
-    if (this.row == 1) items = this.analysisService.getPIDsNoise(parsedSignal.time, parsedSignal.intensities, parsedSignal.PIDNames, 150)
+    if (this.row == 1) items = this.analysisService.getPIDsNoise(parsedSignal.time, parsedSignal.intensities, parsedSignal.PIDNames, constants.SELECT_AREA_WIDTH)
     
-    else items = this.analysisService.getPIDsPerformance(parsedSignal.time, parsedSignal.intensities, parsedSignal.PIDNames, 150)
+    else items = this.analysisService.getPIDsPerformance(parsedSignal.time, parsedSignal.intensities, parsedSignal.PIDNames, constants.SELECT_AREA_WIDTH)
 
     return items
   }
@@ -120,6 +145,58 @@ export class FileVisualizationComponent implements OnInit {
 
   public onCloseClick(): void {
     this.dialogRef.close()
+  }
+
+  /* Below functions used to update the UI with an updated visualization of the dataset using the range given by the user */
+  private updateAnalysisData(signals: Signal[]): BaselineResult[] | nonBaselineResult[] {
+    let items : BaselineResult[] | nonBaselineResult[] = [] 
+    let parsedSignal = this.utilService.parseSignals(signals)
+    if (this.row == 1) items = this.analysisService.getUpdatePIDsNoise(parsedSignal.time, parsedSignal.intensities, parsedSignal.PIDNames, this.windSizeArr)
+    
+    else items = this.analysisService.getUpdatePIDsPerformance(parsedSignal.time, parsedSignal.intensities, parsedSignal.PIDNames, this.windSizeArr)
+
+    return items
+  }
+
+  public PointChanged(target, targetValue: number, index: number):void {
+    let targetPairNumber: number = this.getTargetPairNumber(index)
+    if(targetValue != NaN){
+      // The first value is the start point for the PID and the second is the end point.
+      let targetFirstValue: number = this.windSizeArr[targetPairNumber]// Start Point
+      let targetSecondValue: number = targetValue// End Point
+      if (index%2 == 0) {
+        targetFirstValue = targetValue// Start Point
+        targetSecondValue = this.windSizeArr[targetPairNumber]// End Point
+      }
+      // Reset values to previous valid entry if current entry not valid
+      if (!this.areTargetValuesValid(targetFirstValue, targetSecondValue)) {
+        target.value = this.windSizeArr[index]// Overrides user input string on screen
+        targetValue = this.windSizeArr[index]// Updates number used in calculation
+      }
+      // Updates Window Size Array with a valid entry
+      this.windSizeArr[index] = targetValue
+      // Update Results, then update table and chart with updated results
+      let result: BaselineResult[] | nonBaselineResult[] = this.updateAnalysisData(this.signal)
+      this.visualizeTable(result)
+      this.visualizeChart(this.signal, result)
+    }
+  }
+
+  // Each PID has its own Start and End. This finds the end index from giving it the start and the start index from giving it the end
+  private getTargetPairNumber(i: number): number {
+    let numberPair: number = i - 1
+    if (i%2 == 0) numberPair = i + 1
+    return numberPair
+  }
+
+  private areTargetValuesValid(startValue: number, endValue: number): boolean {
+    // General bounds checking, both values are < max and > min
+    if (startValue > (this.signal[0].time.length - 1)/10 || startValue < 0 || endValue > (this.signal[0].time.length - 1)/10 || endValue < 0) {
+      return false
+    }
+    // If the first value is greater than the second value, values are invalid
+    if (startValue > endValue) return false
+    return true
   }
  
 }

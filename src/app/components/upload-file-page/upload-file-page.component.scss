@@ -31,6 +31,16 @@
     animation-iteration-count: infinite;
   }
   
+  .savedMessage {
+    color: gray;
+    margin: 0;
+    font-size: small;
+    position: absolute;
+    left: 5;
+    bottom: 1;
+    user-select: none;
+  }
+
   /* Shake animation */
   @keyframes shake {
     0% {

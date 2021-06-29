@@ -19,6 +19,7 @@ export class FinalResultComponent implements OnInit {
   public concentrations: number[]
   private testResults = []
   private testInfo: any
+  public windSizeArr
 
   public detailTableHeader : string[] = []
   public resultTableHeader: string[] = []
@@ -41,6 +42,7 @@ export class FinalResultComponent implements OnInit {
     private dialogService: DialogService, private dialogRef: MatDialogRef<FinalResultComponent>, private sanitizer: DomSanitizer) { 
     this.signals = data.signals
     this.concentrations = data.concentrations
+    this.windSizeArr = data.windows
   }
 
   ngOnInit(): void {
@@ -65,12 +67,22 @@ export class FinalResultComponent implements OnInit {
       if (results[i] == undefined) results[i] = []
       for (let j = 0; j < this.signalsMatrixColumns(); j++) {
         let parsedSignal = this.utilService.parseSignals(signals[i][j])
-        if (i == 0) {
-          results[i][j] = this.analysisService.getPIDsNoise(parsedSignal.time, parsedSignal.intensities, 
-            parsedSignal.PIDNames, constants.SELECT_AREA_WIDTH)
+        if(this.windSizeArr[i][j].length == 0){
+          if (i == 0) {
+            results[i][j] = this.analysisService.getPIDsNoise(parsedSignal.time, parsedSignal.intensities, 
+              parsedSignal.PIDNames, constants.SELECT_AREA_WIDTH)
+          } else {
+            results[i][j] = this.analysisService.getPIDsPerformance(parsedSignal.time, parsedSignal.intensities, 
+              parsedSignal.PIDNames, constants.SELECT_AREA_WIDTH)
+          }
         } else {
-          results[i][j] = this.analysisService.getPIDsPerformance(parsedSignal.time, parsedSignal.intensities, 
-            parsedSignal.PIDNames, constants.SELECT_AREA_WIDTH)
+          if (i == 0) {
+            results[i][j] = this.analysisService.getUpdatePIDsNoise(parsedSignal.time, parsedSignal.intensities, 
+              parsedSignal.PIDNames, this.windSizeArr[i][j])
+          } else {
+            results[i][j] = this.analysisService.getUpdatePIDsPerformance(parsedSignal.time, parsedSignal.intensities, 
+              parsedSignal.PIDNames, this.windSizeArr[i][j])
+          }
         }
       }
     }

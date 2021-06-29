@@ -72,9 +72,11 @@
               [row] = "i + 1"
               [numOfTest] = "j + 1"
               [concentration] = "concentrationNumberArray[i]"
+              [windSizeArr] = "windSizeArr[i][j]"
               [ngStyle]="{width: fileBlockWidth + '%', height:fileBlockHeight + '%'}" 
               style="float: left;"
               (fileChanged)="fileChangedHandler($event, i, j)"
+              (windReturned)="windReturnedHandler($event, i, j)"
               ></app-upload-file-page>
             </div>
         </div>

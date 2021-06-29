@@ -23,3 +23,54 @@ td, th {
 .mat-row:nth-child(odd) {
     background-color: whitesmoke;
 }
+
+form {
+    text-align: center;
+}
+
+h2 {
+    margin: 0;
+}
+
+h3 {
+    flex: auto;
+    margin-bottom: 5px;
+    max-width: 300px;
+    overflow: auto;
+}
+
+form div {
+    display: flex;
+    text-align: center;
+}
+
+.formBox {
+    display: flex;
+    flex-wrap: wrap;
+    text-align: center;
+    justify-content: center;
+}
+
+.formBox div {
+    display: block;
+    justify-content: center;
+    margin: 0% 2%;
+}
+
+.formBox div div {
+    display: flex;
+    flex: auto;
+    justify-content: center;
+    margin: 0;
+}
+
+mat-form-field{
+    text-align: center;
+    margin: 0 10px;
+    width: 50%;
+}
+
+mat-form-field input {
+    padding: 10px;
+    width: 70px;
+}
