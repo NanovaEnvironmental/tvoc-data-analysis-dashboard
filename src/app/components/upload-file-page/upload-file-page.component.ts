@@ -82,11 +82,19 @@ export class UploadFilePageComponent implements OnInit {
   }
 
   public async viewFile() : Promise<void> {
+    this.signals = this.refreshPIDNames(this.signals, this.configs)
     let temp = this.dialogService.openFileVisualizationDialog(this.signals, this.row, this.windSizeArr)
     temp.afterClosed().subscribe(result => {
       this.windReturned.emit(result)
       this.savedMessageDisplay = ""
     })
+  }
+
+  private refreshPIDNames(signals: Signal[], config: Config[]): Signal[] {
+    for(let i = 0; i < signals.length; i++){
+      signals[i].PIDName = config[i].PIDName
+    }
+    return signals
   }
 
   /* time[i] = time[i] - time[0] */

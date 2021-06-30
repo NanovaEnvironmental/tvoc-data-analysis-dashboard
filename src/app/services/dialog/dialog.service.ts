@@ -28,9 +28,9 @@ export class DialogService {
     return this.dialog.open(PopupComponent, dialogConfig)
   }
 
-  public openFinalResultDialog(signals: Signal[][][], concentrations: number[], windSizeArr: number[][][]) {
+  public openFinalResultDialog(signals: Signal[][][], concentrations: number[], windSizeArr: number[][][], nameArray: string[]) {
     let dialogConfig = new MatDialogConfig()
-    dialogConfig.data = {'signals': signals, 'concentrations': concentrations, 'windows': windSizeArr}
+    dialogConfig.data = {'signals': signals, 'concentrations': concentrations, 'windows': windSizeArr, 'nameArray': nameArray}
     dialogConfig.width = "120%"
     dialogConfig.height = "100%"
     return this.dialog.open(FinalResultComponent, dialogConfig)
