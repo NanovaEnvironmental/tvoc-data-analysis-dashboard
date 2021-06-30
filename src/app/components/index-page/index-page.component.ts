@@ -174,7 +174,7 @@ export class IndexPageComponent implements OnInit {
   public analysis() {
     try {
       this.detectInputError(this.signals, this.concentrationNumberArray)
-      this.dialogService.openFinalResultDialog(this.signals, this.concentrationNumberArray, this.windSizeArr)
+      this.dialogService.openFinalResultDialog(this.signals, this.concentrationNumberArray, this.windSizeArr, this.getPIDNameArray())
     } catch (err) {
       console.log(err)
       this.dialogService.openMsgDialog(err.message)
@@ -201,6 +201,14 @@ export class IndexPageComponent implements OnInit {
     for (let i = 1; i < concentrations.length; i++) {
       if (concentrations[i] == 0 || isNaN(concentrations[i])) throw new Error("浓度值填写错误")
     }   
+  }
+
+  // Helper for getting array of PIDNames. Used in detectInputErrors to refresh each signals PIDName as each signal is checked for errors.
+  private getPIDNameArray(): string[] {
+    let result: string[] = []
+    let control = this.pidsForms.controls
+    control.forEach(item => result.push(item.value.PIDName))
+    return result
   }
 
   public windReturnedHandler(windArr: number[], i:number, j:number){

@@ -94,12 +94,17 @@ export class FileVisualizationComponent implements OnInit {
   }
 
   private getDataAnalysis(signals: Signal[]): BaselineResult[] | nonBaselineResult[] {
-    let results: BaselineResult[] | nonBaselineResult[] = undefined
+    // If Window Array is not full, use default window size
+    // If Window Array is full, use updated window size
+    let windowSize = (this.windSizeArr.length != 2*signals.length) ? constants.SELECT_AREA_WIDTH : this.windSizeArr
+    
+    let items : BaselineResult[] | nonBaselineResult[] = [] 
+    let parsedSignal = this.utilService.parseSignals(signals)
+    if (this.row == 1) items = this.analysisService.getPIDsNoise(parsedSignal.time, parsedSignal.intensities, parsedSignal.PIDNames, windowSize)
+    
+    else items = this.analysisService.getPIDsPerformance(parsedSignal.time, parsedSignal.intensities, parsedSignal.PIDNames, windowSize)
 
-    if (this.windSizeArr.length != 2*signals.length) results = this.analysisData(signals)// If Window Array is not full, use normal method
-    else results = this.updateAnalysisData(signals)// if Window Array is full, use method for updated windows
-
-    return results
+    return items
   }
 
   private findMarkPointsIndex(result: BaselineResult | nonBaselineResult): number[] {
@@ -124,16 +129,6 @@ export class FileVisualizationComponent implements OnInit {
     return result.startPointIndex != undefined && result.responsePointIndex != undefined && result.T90 != undefined
   }
 
-  private analysisData(signals: Signal[]): BaselineResult[] | nonBaselineResult[] {
-    let items : BaselineResult[] | nonBaselineResult[] = [] 
-    let parsedSignal = this.utilService.parseSignals(signals)
-    if (this.row == 1) items = this.analysisService.getPIDsNoise(parsedSignal.time, parsedSignal.intensities, parsedSignal.PIDNames, constants.SELECT_AREA_WIDTH)
-    
-    else items = this.analysisService.getPIDsPerformance(parsedSignal.time, parsedSignal.intensities, parsedSignal.PIDNames, constants.SELECT_AREA_WIDTH)
-
-    return items
-  }
-
   private visualizeTable(results: BaselineResult[] | nonBaselineResult[]): void {
     /* every signal has the same concentraion */
 
@@ -148,15 +143,6 @@ export class FileVisualizationComponent implements OnInit {
   }
 
   /* Below functions used to update the UI with an updated visualization of the dataset using the range given by the user */
-  private updateAnalysisData(signals: Signal[]): BaselineResult[] | nonBaselineResult[] {
-    let items : BaselineResult[] | nonBaselineResult[] = [] 
-    let parsedSignal = this.utilService.parseSignals(signals)
-    if (this.row == 1) items = this.analysisService.getUpdatePIDsNoise(parsedSignal.time, parsedSignal.intensities, parsedSignal.PIDNames, this.windSizeArr)
-    
-    else items = this.analysisService.getUpdatePIDsPerformance(parsedSignal.time, parsedSignal.intensities, parsedSignal.PIDNames, this.windSizeArr)
-
-    return items
-  }
 
   public PointChanged(target, targetValue: number, index: number):void {
     let targetPairNumber: number = this.getTargetPairNumber(index)
@@ -176,7 +162,7 @@ export class FileVisualizationComponent implements OnInit {
       // Updates Window Size Array with a valid entry
       this.windSizeArr[index] = targetValue
       // Update Results, then update table and chart with updated results
-      let result: BaselineResult[] | nonBaselineResult[] = this.updateAnalysisData(this.signal)
+      let result: BaselineResult[] | nonBaselineResult[] = this.getDataAnalysis(this.signal)
       this.visualizeTable(result)
       this.visualizeChart(this.signal, result)
     }
