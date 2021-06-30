@@ -97,24 +97,73 @@ export class AnalysisService {
     return result
   }
 
-  public getPIDsPerformance(times: number[][], intensities: number[][], PIDNames: string[], windSize: number): nonBaselineResult[] {
-    let results: nonBaselineResult[] = []
-    for (let i = 0; i < times.length; i++) {
-      let result = this.getPIDPerformance(times[i], intensities[i], PIDNames[i], windSize)
-      results.push(result)
+  //Below 2 functions receive window size as number or as an array. They are handled differently, but the same function can be passed both
+  public getPIDsPerformance(times: number[][], intensities: number[][], PIDNames: string[], windSize: any): nonBaselineResult[] {
+    if (windSize[0] == undefined){//Fixed Window Size passed
+      let results: nonBaselineResult[] = []
+      for (let i = 0; i < times.length; i++) {
+        let result = this.getPIDPerformance(times[i], intensities[i], PIDNames[i], windSize)
+        results.push(result)
+      }
+      return results
+    } else {//Array Window Size passed
+      for(let i = 0; i < windSize.length; i++) windSize[i] *= 10
+      let results: nonBaselineResult[] = []
+      for (let i = 0; i < times.length; i++) {
+        let result = this.getUpdatePIDPerformance(times[i], intensities[i], PIDNames[i], windSize[2*i], windSize[2*i +1])
+        results.push(result)
+      }
+      for(let i = 0; i < windSize.length; i++) windSize[i] /= 10
+      return results
     }
-    return results
   }
 
-  public getPIDsNoise(times: number[][], intensities: number[][], PIDNames: string[], windSize: number): BaselineResult[]{
-    let results: BaselineResult[] = []
-    for (let i = 0; i < times.length; i++) {
-      let result = this.getPIDNoise(times[i], intensities[i], PIDNames[i] ,windSize)
-      results.push(result)
+  public getPIDsNoise(times: number[][], intensities: number[][], PIDNames: string[], windSize: any): BaselineResult[]{
+    if(windSize[0] == undefined){//Fixed Window Size passed
+      let results: BaselineResult[] = []
+      for (let i = 0; i < times.length; i++) {
+        let result = this.getPIDNoise(times[i], intensities[i], PIDNames[i], windSize)
+        results.push(result)
+      }
+      return results
+    } else {//Array Window Size passed
+      for(let i = 0; i < windSize.length; i++) windSize[i] *= 10
+      let results: BaselineResult[] = []
+      for (let i = 0; i < times.length; i++) {
+        let result = this.getUpdatePIDNoise(times[i], intensities[i], PIDNames[i], windSize[2*i], windSize[2*i +1])
+        results.push(result)
+      }
+      for(let i = 0; i < windSize.length; i++) windSize[i] /= 10
+      return results
     }
-    return results
   }
- 
   
+  //Methods for updating after a user changes the Window Size of the visualized dataset
+  private getUpdatePIDPerformance(time: number[], intensity: number[], PIDName: string, startPoint: number, endpoint: number): nonBaselineResult {
+      let startPointIndex = this.getStartPointIndex(intensity)
+      let validArea = this.getUpdateValidArea(intensity, startPoint, endpoint)
+      let avgIntensity = parseFloat(this.utilService.getMeanNumber(intensity.slice(validArea[0], validArea[validArea.length - 1] + 1)).toFixed(0))
+      let responsePointIndex = this.getResponsePointIndex(intensity, startPointIndex, avgIntensity)
+      let T90 = this.getT90(startPointIndex, responsePointIndex, time)
+      let std = this.utilService.getSTD(avgIntensity, intensity.slice(validArea[0], validArea[validArea.length - 1] + 1))
+      let result = { PIDName: PIDName, numOfPoints: validArea.length, mean: avgIntensity, std: std, startPointIndex: startPointIndex, 
+        startPointTime: time[startPointIndex], responsePointTime: time[responsePointIndex], responsePointIndex: responsePointIndex, T90: T90, validArea: validArea}
+      return result
+  }
+
+  private getUpdatePIDNoise(time: number[], intensity: number[], PIDName: string, startPoint: number, endpoint: number): BaselineResult {
+    let validArea = this.getUpdateValidArea(intensity, startPoint, endpoint)
+    let avgIntensity = this.utilService.getMeanNumber(intensity.slice(validArea[0], validArea[validArea.length - 1] + 1))
+    let std = this.utilService.getSTD(avgIntensity, intensity.slice(validArea[0], validArea[validArea.length - 1] + 1))
+
+    let result = {PIDName: PIDName, numOfPoints: validArea.length, mean: avgIntensity, std: std, validArea: validArea}
+    return result
+  }
+
+  private getUpdateValidArea(intensity: number[], startPoint: number, endpoint: number): number[] {
+    let validAreaIndex = []
+    for (let i = 0; i < endpoint - startPoint + 1; i++) validAreaIndex.push(startPoint + i)
+    return validAreaIndex
+  }
 
 }

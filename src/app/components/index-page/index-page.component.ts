@@ -19,10 +19,13 @@ export class IndexPageComponent implements OnInit {
   public possibleRange: number[] = constants.POSSIBLE_RANGE
   public possibleNumOfRepeatedTest: number[] = constants.POSSIBLE_NUM_OF_REPEATED_TEST
 
+  public windSizeArr: number[][][] = []
+
   private signals: Signal[][][] = []
 
   constructor(public formBuilder: FormBuilder, private dialogService: DialogService) { 
     this.form = this.buildForm()
+    this.windSizeArr = this.buildWindSizeArr()
   }
 
   ngOnInit(): void {
@@ -73,6 +76,16 @@ export class IndexPageComponent implements OnInit {
     return this.form.controls.files as FormArray
   }
 
+  private buildWindSizeArr() {
+    let windowArray: number[][][] = []
+    for(let i = 0; i < constants.POSSIBLE_NUMBER_OF_CONCENTRATION.length; i++){
+      if(windowArray[i] == undefined) windowArray[i] = []
+      for(let j = 0; j < constants.POSSIBLE_NUM_OF_REPEATED_TEST.length; j++){
+        if(windowArray[i][j] == undefined) windowArray[i][j] = []
+      }
+    }
+    return windowArray
+  }
 
   private buildForm(): FormGroup {
     return this.formBuilder.group({
@@ -161,7 +174,7 @@ export class IndexPageComponent implements OnInit {
   public analysis() {
     try {
       this.detectInputError(this.signals, this.concentrationNumberArray)
-      this.dialogService.openFinalResultDialog(this.signals, this.concentrationNumberArray)  
+      this.dialogService.openFinalResultDialog(this.signals, this.concentrationNumberArray, this.windSizeArr, this.getPIDNameArray())
     } catch (err) {
       console.log(err)
       this.dialogService.openMsgDialog(err.message)
@@ -189,6 +202,18 @@ export class IndexPageComponent implements OnInit {
       if (concentrations[i] == 0 || isNaN(concentrations[i])) throw new Error("浓度值填写错误")
     }   
   }
+
+  // Helper for getting array of PIDNames. Used in detectInputErrors to refresh each signals PIDName as each signal is checked for errors.
+  private getPIDNameArray(): string[] {
+    let result: string[] = []
+    let control = this.pidsForms.controls
+    control.forEach(item => result.push(item.value.PIDName))
+    return result
+  }
+
+  public windReturnedHandler(windArr: number[], i:number, j:number){
+    this.windSizeArr[i][j] = windArr
+  }
   
 
   public cleanFilesAndSignals(numOfRepeatedTest: number|undefined, numOfConcentration: number|undefined) :void {
@@ -196,5 +221,6 @@ export class IndexPageComponent implements OnInit {
     if (numOfConcentration == undefined) numOfConcentration = this.numOfConcentration
     this.form.controls.files = this.buildFileForm(numOfRepeatedTest, numOfConcentration)
     this.signals = []
+    this.windSizeArr = this.buildWindSizeArr()
   }
 }

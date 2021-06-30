@@ -19,6 +19,8 @@ export class FinalResultComponent implements OnInit {
   public concentrations: number[]
   private testResults = []
   private testInfo: any
+  public windSizeArr
+  public nameArray: string[]
 
   public detailTableHeader : string[] = []
   public resultTableHeader: string[] = []
@@ -41,6 +43,8 @@ export class FinalResultComponent implements OnInit {
     private dialogService: DialogService, private dialogRef: MatDialogRef<FinalResultComponent>, private sanitizer: DomSanitizer) { 
     this.signals = data.signals
     this.concentrations = data.concentrations
+    this.windSizeArr = data.windows
+    this.nameArray = data.nameArray
   }
 
   ngOnInit(): void {
@@ -48,7 +52,7 @@ export class FinalResultComponent implements OnInit {
       this.testResults = this.initializeResultMatrix(this.signals)
 
       /* {PIDNames: [PID1, PID2], concentrations: [0, 50, 100], numOfRepeatedTest: 2} */
-      this.testInfo = {PIDNames: this.getPIDNames(this.signals), concentrations: this.concentrations, numOfRepeatedTest: this.getNumOfRepeatedTest(this.signals)}
+      this.testInfo = {PIDNames: this.nameArray, concentrations: this.concentrations, numOfRepeatedTest: this.getNumOfRepeatedTest(this.signals)}
 
       this.visualizeDetailTable(this.testInfo, this.testResults)
       this.visualizeResultTable(this.testInfo, this.testResults)
@@ -64,13 +68,16 @@ export class FinalResultComponent implements OnInit {
     for (let i = 0; i < this.signalsMatrixRows(); i++) {
       if (results[i] == undefined) results[i] = []
       for (let j = 0; j < this.signalsMatrixColumns(); j++) {
+
         let parsedSignal = this.utilService.parseSignals(signals[i][j])
+        let windowSize = (this.windSizeArr[i][j].length == 0) ? constants.SELECT_AREA_WIDTH : this.windSizeArr[i][j]//if entry not filled at i,j default window size set
+        
         if (i == 0) {
           results[i][j] = this.analysisService.getPIDsNoise(parsedSignal.time, parsedSignal.intensities, 
-            parsedSignal.PIDNames, constants.SELECT_AREA_WIDTH)
+            this.nameArray, windowSize)
         } else {
           results[i][j] = this.analysisService.getPIDsPerformance(parsedSignal.time, parsedSignal.intensities, 
-            parsedSignal.PIDNames, constants.SELECT_AREA_WIDTH)
+            this.nameArray, windowSize)
         }
       }
     }

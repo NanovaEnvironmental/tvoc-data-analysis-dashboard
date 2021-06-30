@@ -10,6 +10,7 @@
         <button mat-icon-button color="accent" (click)="viewFile()">
             <mat-icon>visibility</mat-icon>
         </button>
+        <p class="savedMessage" [style.display]="savedMessageDisplay">Saved</p>
     </ng-template>
 
     <ng-template #elseBlock>

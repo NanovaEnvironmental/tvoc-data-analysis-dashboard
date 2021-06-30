@@ -16,11 +16,14 @@ export class UploadFilePageComponent implements OnInit {
   @Input('row') row: number
   @Input('numOfTest') numOfTest: number
   @Input('concentration') concentration: number
+  @Input('windSizeArr') windSizeArr: number[]
 
   @Output() fileChanged: EventEmitter<Signal[]> = new EventEmitter()
+  @Output() windReturned: EventEmitter<number[]> = new EventEmitter()
 
   public signals: Signal[]
   public file: File;
+  public savedMessageDisplay: string = "none"
 
   constructor(private dialogService: DialogService, private utilService: UtilService) { }
 
@@ -44,6 +47,8 @@ export class UploadFilePageComponent implements OnInit {
     this.file = undefined
     for (let i = 0;  i < this.signals.length; i++) this.signals[i] = undefined
     this.fileChanged.emit(this.signals)
+    this.savedMessageDisplay = "none"
+    this.windReturned.emit([])// Empty Window Size Array element
   }
 
   public async tryToParseAndValidateFile(file: File): Promise<Signal[]> {
@@ -77,7 +82,19 @@ export class UploadFilePageComponent implements OnInit {
   }
 
   public async viewFile() : Promise<void> {
-    this.dialogService.openFileVisualizationDialog(this.signals, this.row)
+    this.signals = this.refreshPIDNames(this.signals, this.configs)
+    let temp = this.dialogService.openFileVisualizationDialog(this.signals, this.row, this.windSizeArr)
+    temp.afterClosed().subscribe(result => {
+      this.windReturned.emit(result)
+      this.savedMessageDisplay = ""
+    })
+  }
+
+  private refreshPIDNames(signals: Signal[], config: Config[]): Signal[] {
+    for(let i = 0; i < signals.length; i++){
+      signals[i].PIDName = config[i].PIDName
+    }
+    return signals
   }
 
   /* time[i] = time[i] - time[0] */
