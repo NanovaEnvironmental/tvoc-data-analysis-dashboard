@@ -93,7 +93,7 @@ export class IndexPageComponent implements OnInit {
     for (let i = 0; i < num; i++) {
       formArray.push(this.formBuilder.group({
         PIDName: ['PID' + (i + 1), Validators.required],
-        column: [i==0? 4:5, Validators.required]
+        column: [i + 2, Validators.required]
       }))
     }
     return formArray

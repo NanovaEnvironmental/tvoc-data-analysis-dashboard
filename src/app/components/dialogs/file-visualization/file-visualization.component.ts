@@ -55,7 +55,7 @@ export class FileVisualizationComponent implements OnInit {
   }
 
   private buildChartXAxisSetting(time: number[]): any{
-    let xAxis = {type: 'category', data: time, name: '时间(s)'}
+    let xAxis = {type: 'category', data: time, name: '数据点数'}
     return xAxis
   }
 

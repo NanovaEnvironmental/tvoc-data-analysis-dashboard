@@ -54,8 +54,8 @@ export class UploadFilePageComponent implements OnInit {
       let name = this.configs[i].PIDName
       let intensity = this.tryToReadColumnFromFile(this.configs[i].column, content)
       if (intensity.length < constants.SELECT_AREA_WIDTH) throw new Error("文件行数小于设定阈值：" + constants.SELECT_AREA_WIDTH)
-      let time = this.tryToReadColumnFromFile(2, content)
-      let signal = {'PIDName': name, 'intensity': intensity, 'time': this.formatTime(time), 'numOfTest': this.numOfTest}
+      let time = this.tryToReadTimeFromFile(1, content)
+      let signal = {'PIDName': name, 'intensity': intensity, 'time': time, 'numOfTest': this.numOfTest}
       signals.push(signal)
     }
     return signals
@@ -64,10 +64,10 @@ export class UploadFilePageComponent implements OnInit {
   private tryToReadColumnFromFile(column: number, content: string): number[] {
       let result: number[] = []
       let lines = content.split("\n")
-      for (let i = 0; i < lines.length; i++) {
+      for (let i = 4; i < lines.length - 1; i++) {
         if (lines[i].length != 0) {
           let tokens = lines[i].split(",")
-          let value = Number.parseFloat(tokens[column - 1].split(":")[1])
+          let value = Number.parseFloat(tokens[column - 1]) * 1000
           if (isNaN(value)) throw new Error("文件格式错误，请检查PID列数是否正确")
           else result.push(value)
         }
@@ -75,6 +75,21 @@ export class UploadFilePageComponent implements OnInit {
       }
       return result
   }
+
+  private tryToReadTimeFromFile(column: number, content: string): number[] {
+    let result: number[] = []
+    let lines = content.split("\n")
+    for (let i = 4; i < lines.length - 1; i++) {
+      if (lines[i].length != 0) {
+        let tokens = lines[i].split(",")
+        let value = tokens[column - 1]
+        if (value == null) throw new Error("文件格式错误，请检查PID列数是否正确")
+        else result.push(i - 4)
+      }
+      else console.log("invalid line: " + lines[i])
+    }
+    return result
+}
 
   public async viewFile() : Promise<void> {
     this.dialogService.openFileVisualizationDialog(this.signals, this.row)
