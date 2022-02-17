@@ -1,9 +1,9 @@
-<div class="container" appDnd (fileDropped)="onFileEvent($event)">
+<div class="form-container" appDnd (fileDropped)="onFileEvent($event)">
     <div *ngIf="file; then thenBlock else elseBlock">
     </div>
 
     <ng-template #thenBlock> 
-        <p>{{file.name}}</p> 
+        <div class="file-name"><p>{{file.name}}</p></div> 
         <button mat-icon-button color="accent" (click)="deleteFile()">
             <mat-icon>delete</mat-icon>
         </button>

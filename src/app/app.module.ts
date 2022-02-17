@@ -4,6 +4,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ReactiveFormsModule } from '@angular/forms';
 import { AppRoutingModule } from './app-routing.module';
+import { FlexLayoutModule } from '@angular/flex-layout';
 import { AppComponent } from './app.component';
 import { IndexPageComponent } from './components/index-page/index-page.component';
 import { NgxEchartsModule } from 'ngx-echarts';
@@ -30,6 +31,7 @@ import { FinalResultComponent } from './components/dialogs/final-result/final-re
     MaterialModule,
     BrowserAnimationsModule,
     ReactiveFormsModule,
+    FlexLayoutModule,
     NgxEchartsModule.forRoot({
       echarts: () => import('echarts')
   }),

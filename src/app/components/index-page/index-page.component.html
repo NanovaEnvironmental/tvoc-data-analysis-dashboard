@@ -1,93 +1,91 @@
-<div>
-  <div>
-    <form  name="f" [formGroup]="form">
-      <div style="width: 30%; float:left; margin-top: 0%; margin-bottom: 0%; height: 90%;">
-        <h2 style="text-align: center;">测试参数配置</h2>
-        <div>
-          <div>
-            <mat-form-field appearance="standard" style="text-align: center; margin-left:30%; margin-right:5%; width: 15%;">
-              <mat-label>PID数量</mat-label>
-              <mat-select formControlName="numOfPID" (selectionChange)="pidNumChanged($event)" required>
-                <mat-option *ngFor="let numOfPID of possibleNumOfPID" [value]="numOfPID">{{numOfPID}}</mat-option>
-              </mat-select>
-            </mat-form-field>
+<form  name="f" [formGroup]="form" class="row">
+  <div class="col-sm-4">
+    <h2 style="text-align: center;">测试参数配置</h2>
+    <div>
+      <div>
+        <mat-form-field appearance="standard" style="text-align: center; margin-left:30%; margin-right:5%; width: 15%;">
+          <mat-label>PID数量</mat-label>
+          <mat-select formControlName="numOfPID" (selectionChange)="pidNumChanged($event)" required>
+            <mat-option *ngFor="let numOfPID of possibleNumOfPID" [value]="numOfPID">{{numOfPID}}</mat-option>
+          </mat-select>
+        </mat-form-field>
 
-            <mat-form-field appearance="standard" style="text-align: center; margin-left:5%; margin-right:30%; width: 15%;">
-              <mat-label>量程</mat-label>
-              <mat-select formControlName="range" (selectionChange)="rangeChanged($event)" required>
-                <mat-option *ngFor="let range of possibleRange" [value]="range">{{range}}</mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
+        <mat-form-field appearance="standard" style="text-align: center; margin-left:5%; margin-right:30%; width: 15%;">
+          <mat-label>量程</mat-label>
+          <mat-select formControlName="range" (selectionChange)="rangeChanged($event)" required>
+            <mat-option *ngFor="let range of possibleRange" [value]="range">{{range}}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div *ngFor="let pid of pidsForms.controls; let i = index">
+        <div [formGroup]="pid">
+          <mat-form-field appearance="standard" style="text-align: center; margin-left:30%; margin-right:5%; width:15%">
+            <mat-label>PID{{i + 1}} 名称</mat-label>
+            <input matInput type="text" formControlName="PIDName" required>
+          </mat-form-field>
     
-          <div *ngFor="let pid of pidsForms.controls; let i = index">
-            <div [formGroup]="pid">
-              <mat-form-field appearance="standard" style="text-align: center; margin-left:30%; margin-right:5%; width:15%">
-                <mat-label>PID{{i + 1}} 名称</mat-label>
-                <input matInput type="text" formControlName="PIDName" required>
-              </mat-form-field>
-        
-              <mat-form-field appearance="standard" style="text-align: center; margin-left: 5%; margin-right: 30%; width:15%">
-                <mat-label>PID{{i+1}} 信号列数</mat-label>
-                  <input matInput type="text" formControlName="column" required>
-              </mat-form-field>
-            </div>
-          </div>
-        </div>
-
-        <div style="margin-top: 5%;">
-          <div>
-            <mat-form-field appearance="standard" style="text-align: center; margin-left:30%; margin-right:5%; width: 15%;">
-              <mat-label>浓度数量</mat-label>
-              <mat-select formControlName="numOfConcentration" (selectionChange)="concentrationNumChanged($event)" required>
-                <mat-option *ngFor="let numOfConcentration of possibleNumOfConcentration" [value]="numOfConcentration">{{numOfConcentration}}</mat-option>
-              </mat-select>
-            </mat-form-field>
-
-            <mat-form-field appearance="standard" style="text-align: center; margin-left:5%; margin-right:30%; width: 15%;">
-              <mat-label>重复测试次数</mat-label>
-              <mat-select formControlName="numOfRepeatedTest" (selectionChange)="numOfRepeatedTestChanged($event)" required>
-                <mat-option *ngFor="let numOfRepeatedTest of possibleNumOfRepeatedTest" [value]="numOfRepeatedTest">{{numOfRepeatedTest}}</mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-         
-          <div *ngFor="let concentration of concentrationForms.controls; let i = index">
-            <div [formGroup]="concentration">
-              <span style="text-align: center; margin-left:30%; margin-right:5%; width:15%; display: inline-block;">浓度 {{i + 1}}</span>
-              <mat-form-field appearance="standard" style="text-align: center; margin-left:5%; margin-right:30%; width:15%">
-                <mat-label>浓度值</mat-label>
-                <input matInput type="text" formControlName="concentration" required>
-              </mat-form-field>
-            </div>
-          </div>
+          <mat-form-field appearance="standard" style="text-align: center; margin-left: 5%; margin-right: 30%; width:15%">
+            <mat-label>PID{{i+1}} 信号列数</mat-label>
+              <input matInput type="text" formControlName="column" required>
+          </mat-form-field>
         </div>
       </div>
+    </div>
 
-      <div style="width: 70%;float:left; margin-top: 0%; margin-bottom: 0%; height: 90%;">
-        <div *ngFor="let subFiles of files.controls; let i = index">
-            <div>
-              <app-upload-file-page  *ngFor="let file of subFiles.controls; let j = index" 
-              [testConfig] = "buildTestConfig()"
-              [row] = "i + 1"
-              [numOfTest] = "j + 1"
-              [concentration] = "concentrationNumberArray[i]"
-              [ngStyle]="{width: fileBlockWidth + '%', height:fileBlockHeight + '%'}" 
-              style="float: left;"
-              (fileChanged)="fileChangedHandler($event, i, j)"
-              ></app-upload-file-page>
-            </div>
+    <div style="margin-top: 5%;">
+      <div>
+        <mat-form-field appearance="standard" style="text-align: center; margin-left:30%; margin-right:5%; width: 15%;">
+          <mat-label>浓度数量</mat-label>
+          <mat-select formControlName="numOfConcentration" (selectionChange)="concentrationNumChanged($event)" required>
+            <mat-option *ngFor="let numOfConcentration of possibleNumOfConcentration" [value]="numOfConcentration">{{numOfConcentration}}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="standard" style="text-align: center; margin-left:5%; margin-right:30%; width: 15%;">
+          <mat-label>重复测试次数</mat-label>
+          <mat-select formControlName="numOfRepeatedTest" (selectionChange)="numOfRepeatedTestChanged($event)" required>
+            <mat-option *ngFor="let numOfRepeatedTest of possibleNumOfRepeatedTest" [value]="numOfRepeatedTest">{{numOfRepeatedTest}}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      
+      <div *ngFor="let concentration of concentrationForms.controls; let i = index">
+        <div [formGroup]="concentration">
+          <span style="text-align: center; margin-left:30%; margin-right:5%; width:15%; display: inline-block;">浓度 {{i + 1}}</span>
+          <mat-form-field appearance="standard" style="text-align: center; margin-left:5%; margin-right:30%; width:15%">
+            <mat-label>浓度值</mat-label>
+            <input matInput type="text" formControlName="concentration" required>
+          </mat-form-field>
         </div>
       </div>
-    </form>
-  </div>
-  
-  <div>
-    <div style="width: 30%; float: left;">
-      <button mat-raised-button color="primary" (click)="analysis()">分析数据</button>
-    </div>
-    <div  style="width: 30%; float: left;">
-      <button mat-raised-button color="primary" (click)="cleanFilesAndSignals(undefined, undefined)">清空数据</button>
     </div>
   </div>
-</div>
+
+  <!-- <div style="width: 70%; height: 90%;"> -->
+  <div class="row col-sm-8">
+    <div *ngFor="let subFiles of files.controls; let i = index">
+        <div fxLayout>
+          <app-upload-file-page  *ngFor="let file of subFiles.controls; let j = index" 
+          [testConfig] = "buildTestConfig()"
+          [row] = "i + 1"
+          [numOfTest] = "j + 1"
+          [concentration] = "concentrationNumberArray[i]"
+          [ngStyle]="{width: fileBlockWidth + '%', height:fileBlockHeight + '%'}" 
+          (fileChanged)="fileChangedHandler($event, i, j)"
+          ></app-upload-file-page>
+        </div>
+    </div>
+
+    <div class="row">
+      <div class="col-sm-5">
+        <button mat-raised-button color="primary" (click)="analysis()">分析数据</button>
+      </div>
+      <div class="col-sm-5">
+        <button mat-raised-button color="primary" (click)="cleanFilesAndSignals(undefined, undefined)">清空数据</button>
+      </div>
+    </div>
+  </div>
+</form>
+
+
