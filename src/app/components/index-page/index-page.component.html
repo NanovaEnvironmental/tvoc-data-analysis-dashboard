@@ -1,5 +1,5 @@
 <form  name="f" [formGroup]="form" class="row">
-  <div class="col-sm-4">
+  <div class="col-sm-3">
     <h2 style="text-align: center;">测试参数配置</h2>
     <div>
       <div>
@@ -63,18 +63,16 @@
   </div>
 
   <!-- <div style="width: 70%; height: 90%;"> -->
-  <div class="row col-sm-8">
-    <div *ngFor="let subFiles of files.controls; let i = index">
-        <div fxLayout>
-          <app-upload-file-page  *ngFor="let file of subFiles.controls; let j = index" 
+  <div class="col-sm-8">
+    <div *ngFor="let subFiles of files.controls; let i = index" fxLayout>  
+          <app-upload-file-page  *ngFor="let file of subFiles.controls; let j = index"
           [testConfig] = "buildTestConfig()"
           [row] = "i + 1"
           [numOfTest] = "j + 1"
           [concentration] = "concentrationNumberArray[i]"
           [ngStyle]="{width: fileBlockWidth + '%', height:fileBlockHeight + '%'}" 
           (fileChanged)="fileChangedHandler($event, i, j)"
-          ></app-upload-file-page>
-        </div>
+          ></app-upload-file-page>  
     </div>
 
     <div class="row">

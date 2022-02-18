@@ -62,11 +62,11 @@ export class IndexPageComponent implements OnInit {
   }
 
   get fileBlockWidth(): number {
-    return (1 / this.numOfRepeatedTest) * 90
+    return (1 / this.numOfRepeatedTest) * 100
   }
 
   get fileBlockHeight(): number {
-    return (1 / this.concentrationForms.length) * 90
+    return (1 / this.concentrationForms.length) * 100
   }
 
   get files(): FormArray {
