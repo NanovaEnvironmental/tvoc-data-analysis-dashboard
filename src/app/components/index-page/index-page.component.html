@@ -1,16 +1,16 @@
 <form  name="f" [formGroup]="form" class="row">
-  <div class="col-sm-3">
-    <h2 style="text-align: center;">测试参数配置</h2>
-    <div>
-      <div>
-        <mat-form-field appearance="standard" style="text-align: center; margin-left:30%; margin-right:5%; width: 15%;">
+  <div class="container col-sm-3" fxLayout="column" fxLayoutAlign="start center">
+    <h2>测试参数配置</h2>
+    <div class="ms-5">
+      <div class="row">
+        <mat-form-field appearance="standard" class="col-sm-5">
           <mat-label>PID数量</mat-label>
           <mat-select formControlName="numOfPID" (selectionChange)="pidNumChanged($event)" required>
             <mat-option *ngFor="let numOfPID of possibleNumOfPID" [value]="numOfPID">{{numOfPID}}</mat-option>
           </mat-select>
         </mat-form-field>
 
-        <mat-form-field appearance="standard" style="text-align: center; margin-left:5%; margin-right:30%; width: 15%;">
+        <mat-form-field appearance="standard" class="col-sm-5">
           <mat-label>量程</mat-label>
           <mat-select formControlName="range" (selectionChange)="rangeChanged($event)" required>
             <mat-option *ngFor="let range of possibleRange" [value]="range">{{range}}</mat-option>
@@ -19,13 +19,13 @@
       </div>
 
       <div *ngFor="let pid of pidsForms.controls; let i = index">
-        <div [formGroup]="pid">
-          <mat-form-field appearance="standard" style="text-align: center; margin-left:30%; margin-right:5%; width:15%">
+        <div [formGroup]="pid" class="row">
+          <mat-form-field appearance="standard" class="col-sm-5">
             <mat-label>PID{{i + 1}} 名称</mat-label>
             <input matInput type="text" formControlName="PIDName" required>
           </mat-form-field>
     
-          <mat-form-field appearance="standard" style="text-align: center; margin-left: 5%; margin-right: 30%; width:15%">
+          <mat-form-field appearance="standard" class="col-sm-5">
             <mat-label>PID{{i+1}} 信号列数</mat-label>
               <input matInput type="text" formControlName="column" required>
           </mat-form-field>
@@ -33,27 +33,29 @@
       </div>
     </div>
 
-    <div style="margin-top: 5%;">
-      <div>
-        <mat-form-field appearance="standard" style="text-align: center; margin-left:30%; margin-right:5%; width: 15%;">
+    <div class="ms-5">
+      <div class="row">
+        <mat-form-field appearance="standard" class="col-sm-5">
           <mat-label>浓度数量</mat-label>
           <mat-select formControlName="numOfConcentration" (selectionChange)="concentrationNumChanged($event)" required>
             <mat-option *ngFor="let numOfConcentration of possibleNumOfConcentration" [value]="numOfConcentration">{{numOfConcentration}}</mat-option>
           </mat-select>
         </mat-form-field>
 
-        <mat-form-field appearance="standard" style="text-align: center; margin-left:5%; margin-right:30%; width: 15%;">
+        <mat-form-field appearance="standard" class="col-sm-5">
           <mat-label>重复测试次数</mat-label>
           <mat-select formControlName="numOfRepeatedTest" (selectionChange)="numOfRepeatedTestChanged($event)" required>
             <mat-option *ngFor="let numOfRepeatedTest of possibleNumOfRepeatedTest" [value]="numOfRepeatedTest">{{numOfRepeatedTest}}</mat-option>
           </mat-select>
         </mat-form-field>
       </div>
-      
+    </div>
+
+    <div class="ms-5">
       <div *ngFor="let concentration of concentrationForms.controls; let i = index">
-        <div [formGroup]="concentration">
-          <span style="text-align: center; margin-left:30%; margin-right:5%; width:15%; display: inline-block;">浓度 {{i + 1}}</span>
-          <mat-form-field appearance="standard" style="text-align: center; margin-left:5%; margin-right:30%; width:15%">
+        <div [formGroup]="concentration" class="container row">
+          <span class="col-sm-5 mt-4">浓度 {{i + 1}}</span>
+          <mat-form-field appearance="standard" class="col-sm-5">
             <mat-label>浓度值</mat-label>
             <input matInput type="text" formControlName="concentration" required>
           </mat-form-field>
