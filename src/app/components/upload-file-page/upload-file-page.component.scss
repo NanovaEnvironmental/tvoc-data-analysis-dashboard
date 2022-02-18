@@ -5,7 +5,7 @@
   position: relative;
   margin: 0 auto;
   height: 200px;
-  overflow: scroll;
+  overflow-y: scroll;
 
   input {
     opacity: 0;
@@ -42,6 +42,16 @@
     -webkit-hyphens: auto;
     hyphens: auto;
   }
+}
+
+.form-container::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.form-container {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }
 
 ng-template {
