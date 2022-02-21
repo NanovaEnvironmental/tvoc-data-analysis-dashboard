@@ -22,11 +22,13 @@ export class FileVisualizationComponent implements OnInit {
   public displayedColumns: string[] = ['PIDName', 'numOfPoints', 'mean', 'std', 'startPointTime', 'responsePointTime', 'T90']
   private signal: Signal[]
   private row: number
+  private file: File
 
   constructor(@Inject(MAT_DIALOG_DATA) data: any, private utilService: UtilService, private analysisService: AnalysisService,
   private dialogRef: MatDialogRef<FileVisualizationComponent>, private dialogService: DialogService) {
     this.signal = data.signals
     this.row = data.row
+    this.file = data.file
     this.visualize(this.signal)
   }
 
@@ -55,7 +57,9 @@ export class FileVisualizationComponent implements OnInit {
   }
 
   private buildChartXAxisSetting(time: number[]): any{
-    let xAxis = {type: 'category', data: time, name: '数据点数'}
+    let xAxis
+    if(this.file.type == "application/vnd.ms-excel") xAxis = {type: 'category', data: time, name: '数据点数'}
+    else if (this.file.type == "text/plain") xAxis = {type: 'category', data: time, name: '时间(s)'}
     return xAxis
   }
 

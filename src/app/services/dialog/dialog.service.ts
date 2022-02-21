@@ -12,9 +12,9 @@ export class DialogService {
 
   constructor(public dialog: MatDialog) { }
 
-  public openFileVisualizationDialog(signals: Signal[], row: number) {
+  public openFileVisualizationDialog(signals: Signal[], row: number, file:File) {
     let dialogConfig = new MatDialogConfig()
-    dialogConfig.data = {'signals':signals, 'row': row}
+    dialogConfig.data = {'signals':signals, 'row': row, 'file': file}
     dialogConfig.width = "80%"
     dialogConfig.height = "85%"
     return this.dialog.open(FileVisualizationComponent, dialogConfig)

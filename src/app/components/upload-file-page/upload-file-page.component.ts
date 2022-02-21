@@ -52,16 +52,28 @@ export class UploadFilePageComponent implements OnInit {
     let content = await file.text()
     for (let i = 0; i < PIDNum; i++) {
       let name = this.configs[i].PIDName
-      let intensity = this.tryToReadColumnFromFile(this.configs[i].column, content)
-      if (intensity.length < constants.SELECT_AREA_WIDTH) throw new Error("文件行数小于设定阈值：" + constants.SELECT_AREA_WIDTH)
-      let time = this.tryToReadTimeFromFile(1, content)
-      let signal = {'PIDName': name, 'intensity': intensity, 'time': time, 'numOfTest': this.numOfTest}
+      let intensity
+      let time
+      let signal
+      if(file.type == "application/vnd.ms-excel")
+      {
+        intensity = this.tryToReadColumnFromCsvFile(this.configs[i].column, content)
+        time = this.tryToReadTimeFromFile(1, content)
+        signal = {'PIDName': name, 'intensity': intensity, 'time': time, 'numOfTest': this.numOfTest}
+      } 
+      else if(file.type == "text/plain")
+      {
+        intensity = this.tryToReadColumnFromTxtFile(this.configs[i].column, content)
+        time = this.tryToReadColumnFromTxtFile(0, content)
+        signal = {'PIDName': name, 'intensity': intensity, 'time': this.formatTime(time), 'numOfTest': this.numOfTest}
+      }      
+      if (intensity.length < constants.SELECT_AREA_WIDTH) throw new Error("文件行数小于设定阈值：" + constants.SELECT_AREA_WIDTH)  
       signals.push(signal)
     }
     return signals
   }
 
-  private tryToReadColumnFromFile(column: number, content: string): number[] {
+  private tryToReadColumnFromCsvFile(column: number, content: string): number[] {
       let result: number[] = []
       let lines = content.split("\n")
       for (let i = 4; i < lines.length - 1; i++) {
@@ -75,6 +87,21 @@ export class UploadFilePageComponent implements OnInit {
       }
       return result
   }
+
+  private tryToReadColumnFromTxtFile(column: number, content: string): number[] {
+    let result: number[] = []
+    let lines = content.split("\n")
+    for (let i = 0; i < lines.length; i++) {
+      if (lines[i].length != 0) {
+        let tokens = lines[i].split(",")
+        let value = Number.parseFloat(tokens[column + 1].split(":")[1])
+        if (isNaN(value)) throw new Error("文件格式错误，请检查PID列数是否正确")
+        else result.push(value)
+      }
+      else console.log("invalid line: " + lines[i])
+    }
+    return result
+}
 
   private tryToReadTimeFromFile(column: number, content: string): number[] {
     let result: number[] = []
@@ -92,7 +119,7 @@ export class UploadFilePageComponent implements OnInit {
 }
 
   public async viewFile() : Promise<void> {
-    this.dialogService.openFileVisualizationDialog(this.signals, this.row)
+    this.dialogService.openFileVisualizationDialog(this.signals, this.row, this.file)
   }
 
   /* time[i] = time[i] - time[0] */
