@@ -86,6 +86,7 @@ export class FileVisualizationComponent implements OnInit {
     if (this.isNonBaselineResult(result)) {
       index.push((result as nonBaselineResult).startPointIndex)
       index.push((result as nonBaselineResult).responsePointIndex)
+      index.push((result as nonBaselineResult).T10Index)
     }
     return index
   }
@@ -117,7 +118,7 @@ export class FileVisualizationComponent implements OnInit {
     /* every signal has the same concentraion */
 
     if (this.row == 1) this.displayedColumns = ['PIDName', 'numOfPoints', 'mean', 'std']
-    else this.displayedColumns = ['PIDName', 'numOfPoints', 'mean', 'std', 'startPointTime', 'responsePointTime', 'T90']
+    else this.displayedColumns = ['PIDName', 'numOfPoints', 'mean', 'std', 'startPointTime', 'responsePointTime', 'T90', 'T10']
 
     this.dataSource = new MatTableDataSource(results)
   }

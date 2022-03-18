@@ -9,13 +9,14 @@ import { UtilService } from '../util/util.service';
 export class AnalysisService {
 
   constructor(private utilService: UtilService) { }
-
+  private endPointIndex
+  private startPointIntensity
 /*---------------------------Helper Method For Analysis a Single File--------------------------------------------------------- */
   private getValidArea(intensity: number[], windSize: number): number[] {
-      let endPointIndex = this.getEndPointIndex(intensity)
-      if (endPointIndex - windSize + 1 < 0) throw new Error("定位到结束点, 但是无法获取有效计算区域")
+      this.endPointIndex = this.getEndPointIndex(intensity)
+      if (this.endPointIndex - windSize + 1 < 0) throw new Error("定位到结束点, 但是无法获取有效计算区域")
       let validAreaIndex = []
-      for (let i = 0; i < windSize; i++) validAreaIndex.push(endPointIndex - windSize + i + 1)
+      for (let i = 0; i < windSize; i++) validAreaIndex.push(this.endPointIndex - windSize + i + 1)
       return validAreaIndex
   }
 
@@ -61,8 +62,8 @@ export class AnalysisService {
   }
 
   private getResponsePointIndex(intensity: number[], startPointIndex: number, avgIntensity: number): number | undefined {
-    let startPointIntensity = intensity[startPointIndex]
-    let thres = ((avgIntensity - startPointIntensity) * 0.9) + startPointIntensity
+    this.startPointIntensity = intensity[startPointIndex]
+    let thres = ((avgIntensity - this.startPointIntensity) * 0.9) + this.startPointIntensity
     for (let i = 0; i < intensity.length; i++) {
       if (intensity[i] >= thres && intensity[i] <= avgIntensity) return i
     }
@@ -75,6 +76,25 @@ export class AnalysisService {
 
     return responsePointTime - startPointTime
   }
+
+  private getT10(time: number[], T10Index: number): number {
+    let endPointTime = time[this.endPointIndex]
+    let T10Time = time[T10Index]
+    return T10Time - endPointTime
+  }
+
+  private getT10Index(intensity: number[], time: number[]): number{
+    
+    let endPointIntensity = intensity[this.endPointIndex]
+    let thres = (endPointIntensity - this.startPointIntensity) * 0.1 + this.startPointIntensity
+    for (let i = this.endPointIndex; i< intensity.length; i++)
+    {
+      if (intensity[i] <= thres) 
+      {
+        return i
+      }
+    }
+  }
  
   private getPIDPerformance(time: number[], intensity: number[], PIDName: string, windSize: number): nonBaselineResult {
       let startPointIndex = this.getStartPointIndex(intensity)
@@ -82,9 +102,11 @@ export class AnalysisService {
       let avgIntensity = parseFloat(this.utilService.getMeanNumber(intensity.slice(validArea[0], validArea[validArea.length - 1] + 1)).toFixed(0))
       let responsePointIndex = this.getResponsePointIndex(intensity, startPointIndex, avgIntensity)
       let T90 = this.getT90(startPointIndex, responsePointIndex, time)
+      let T10Index = this.getT10Index(intensity, time)
+      let T10 = this.getT10(time, T10Index)
       let std = this.utilService.getSTD(avgIntensity, intensity.slice(validArea[0], validArea[validArea.length - 1] + 1))
       let result = { PIDName: PIDName, numOfPoints: validArea.length, mean: avgIntensity, std: std, startPointIndex: startPointIndex, 
-        startPointTime: time[startPointIndex], responsePointTime: time[responsePointIndex], responsePointIndex: responsePointIndex, T90: T90, validArea: validArea}
+        startPointTime: time[startPointIndex], responsePointTime: time[responsePointIndex], responsePointIndex: responsePointIndex, T90: T90, T10: T10, T10Index: T10Index, validArea: validArea}
       return result
   }
 
