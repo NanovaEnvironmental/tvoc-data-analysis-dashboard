@@ -102,7 +102,7 @@ export class FinalResultComponent implements OnInit {
     let results = []
     for (let i = 0; i < numOfConcentration; i++) {
       if (i == 0) results.push([this.utilService.keepInt(PIDData[i].mean), this.utilService.formatSTD(PIDData[i].std)].join(constants.SEPERATOR))
-      else results.push([this.utilService.keepInt(PIDData[i].mean), this.utilService.formatT90(PIDData[i].T90)].join(constants.SEPERATOR))
+      else results.push([this.utilService.keepInt(PIDData[i].mean), this.utilService.formatT90(PIDData[i].T90), this.utilService.formatT10(PIDData[i].T10)].join(constants.SEPERATOR))
     }
     results
 
@@ -133,7 +133,7 @@ export class FinalResultComponent implements OnInit {
        if (i == 0) column[i] = "PID名称"
        else if (i == 1) column[i] = "重复测试次数"
        else if (i == 2) column[i] = this.concentrations[i - 2] + 'ppm' + "(均值 / 标准差)"
-       else if (i == 3) column[i] = this.concentrations[i - 2] + 'ppm' + "(均值 / T90)"
+       else if (i == 3) column[i] = this.concentrations[i - 2] + 'ppm' + "(均值 / T90 / T10)"
        else column[i] = this.concentrations[i - 2] + 'ppm'
      }
      return column
@@ -156,7 +156,7 @@ export class FinalResultComponent implements OnInit {
       else if (i == 7) column[i] = "Avg 改变"
       else if (i == 8) column[i] = "噪声(mV)"
       else if (i == 9) column[i] = this.concentrations[i - 9] + 'ppm' + "(均值 / 标准差 / 改变)"
-      else if (i == 10) column[i] = this.concentrations[i - 9] + 'ppm' + "(均值 / T90 / 下限 / RSD / 改变)"
+      else if (i == 10) column[i] = this.concentrations[i - 9] + 'ppm' + "(均值 / T90 / T10 / 下限 / RSD / 改变)"
       else column[i] = this.concentrations[i - 9] + 'ppm'
     }
     return column
@@ -179,7 +179,7 @@ export class FinalResultComponent implements OnInit {
     for (let i = 0; i < numOfConcentration; i++) {
       if (i == 0) results.push([this.utilService.keepInt(concentrationDetails[i].mean), this.utilService.formatSTD(concentrationDetails[i].std), this.utilService.formatDelta(concentrationDetails[i].change)].join(constants.SEPERATOR))
       
-      else results.push([this.utilService.keepInt(concentrationDetails[i].mean), this.utilService.formatT90(concentrationDetails[i].T90), this.utilService.keepInt(concentrationDetails[i].MDL), 
+      else results.push([this.utilService.keepInt(concentrationDetails[i].mean), this.utilService.formatT90(concentrationDetails[i].T90), this.utilService.formatT10(concentrationDetails[i].T10), this.utilService.keepInt(concentrationDetails[i].MDL), 
       this.utilService.formatRSD(concentrationDetails[i].RSD), this.utilService.formatDelta(concentrationDetails[i].change)].join(constants.SEPERATOR))
     }    
 

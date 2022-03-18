@@ -108,6 +108,7 @@ export class UtilService {
     let intensitiesDelta = []
     let STDs = []
     let T90s = []
+    let T10s = []
     let RSDs = []
     
     let numOfConcentration = concentrations.length
@@ -118,6 +119,7 @@ export class UtilService {
       STDs.push(this.getMeanNumber(PIDData[i].map(cell => cell.std)))
       if (i != 0) {
         T90s.push(this.getMeanNumber(PIDData[i].map(cell => cell.T90)))
+        T10s.push(this.getMeanNumber(PIDData[i].map(cell => cell.T10)))
         RSDs.push(this.getRSD(PIDData[i].map(cell => cell.mean)))
       }
     }
@@ -131,7 +133,7 @@ export class UtilService {
     for (let i = 0; i < numOfConcentration; i++) {
       if (i == 0) concentrationDetails.push({mean: intensities[i], std: STDs[i], change: intensitiesDelta[i]})
       else {
-        concentrationDetails.push({mean: intensities[i], T90: T90s[i - 1], MDL: mdls[i- 1], RSD: RSDs[i - 1], change: intensitiesDelta[i]})
+        concentrationDetails.push({mean: intensities[i], T90: T90s[i - 1], T10: T10s[i - 1], MDL: mdls[i- 1], RSD: RSDs[i - 1], change: intensitiesDelta[i]})
       }
     }
 
@@ -148,6 +150,10 @@ export class UtilService {
   }
 
   public formatT90(value: number): number {
+    return parseFloat(value.toFixed(1))
+  }
+
+  public formatT10(value: number): number {
     return parseFloat(value.toFixed(1))
   }
 
