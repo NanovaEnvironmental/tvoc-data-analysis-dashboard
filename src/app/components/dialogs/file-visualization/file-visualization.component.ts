@@ -86,7 +86,10 @@ export class FileVisualizationComponent implements OnInit {
     if (this.isNonBaselineResult(result)) {
       index.push((result as nonBaselineResult).startPointIndex)
       index.push((result as nonBaselineResult).responsePointIndex)
-      index.push((result as nonBaselineResult).T10Index)
+      if((result as nonBaselineResult).T10Index != undefined)
+      {
+        index.push((result as nonBaselineResult).T10Index)
+      } 
     }
     return index
   }
