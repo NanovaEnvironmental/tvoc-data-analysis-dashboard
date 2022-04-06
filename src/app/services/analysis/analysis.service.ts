@@ -56,9 +56,7 @@ export class AnalysisService {
         break
       }
     }
-
-    if (startPointIndex != undefined) return startPointIndex
-    else throw new Error("无法定位开始点")
+    return startPointIndex
   }
 
   private getResponsePointIndex(intensity: number[], startPointIndex: number, avgIntensity: number): number | undefined {
