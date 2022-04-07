@@ -58,7 +58,7 @@ export class FileVisualizationComponent implements OnInit {
 
   private buildChartXAxisSetting(time: number[]): any{
     let xAxis
-    if(this.file.type == "application/vnd.ms-excel") xAxis = {type: 'category', data: time, name: '数据点数'}
+    if(this.file.type == "application/vnd.ms-excel" || this.file.type =="text/csv") xAxis = {type: 'category', data: time, name: '数据点数'}
     else if (this.file.type == "text/plain") xAxis = {type: 'category', data: time, name: '时间(s)'}
     return xAxis
   }

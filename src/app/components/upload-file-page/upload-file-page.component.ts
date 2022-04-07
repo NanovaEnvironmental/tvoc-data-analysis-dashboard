@@ -55,7 +55,7 @@ export class UploadFilePageComponent implements OnInit {
       let intensity
       let time
       let signal
-      if(file.type == "application/vnd.ms-excel")
+      if(file.type == "application/vnd.ms-excel" || file.type =="text/csv")
       {
         intensity = this.tryToReadColumnFromCsvFile(this.configs[i].column, content)
         time = this.tryToReadTimeFromFile(1, content)
