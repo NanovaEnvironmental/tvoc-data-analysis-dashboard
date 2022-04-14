@@ -111,7 +111,7 @@ export class UploadFilePageComponent implements OnInit {
         let tokens = lines[i].split(",")
         let value = tokens[column - 1]
         if (value == null) throw new Error("文件格式错误，请检查PID列数是否正确")
-        else result.push(i - 4)
+        else result.push((i - 4) / 10)
       }
       else console.log("invalid line: " + lines[i])
     }
