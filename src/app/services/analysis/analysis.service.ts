@@ -51,7 +51,7 @@ export class AnalysisService {
     let startPointIndex = undefined
 
     for (let i = 0; i < intensity.length - 2; i++) {
-      if (intensity[i + 2] - intensity[i] > 5) {
+      if (intensity[i + 2] - intensity[i] > 3.5) {
         startPointIndex = i
         break
       }
